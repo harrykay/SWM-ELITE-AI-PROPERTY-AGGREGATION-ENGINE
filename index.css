@@ -1,0 +1,55 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --color-accent: #8DC63F;
+  --color-accent-dark: #7ab332;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-[#06080f] text-gray-100 overflow-x-hidden;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+@layer components {
+  .accent-color { color: var(--color-accent); }
+  .bg-accent-color { background-color: var(--color-accent); }
+  .border-accent-color { border-color: var(--color-accent); }
+  
+  .hero-overlay {
+    background: radial-gradient(circle at center, rgba(6, 8, 15, 0.4) 0%, rgba(6, 8, 15, 0.9) 100%);
+  }
+
+  .glass-card {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  
+  .dark .glass-card {
+    background: rgba(255, 255, 255, 0.01);
+  }
+}
+
+@layer utilities {
+  .animate-float { animation: float 6s ease-in-out infinite; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: #06080f; }
+::-webkit-scrollbar-thumb { background: rgba(141, 198, 63, 0.2); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(141, 198, 63, 0.4); }

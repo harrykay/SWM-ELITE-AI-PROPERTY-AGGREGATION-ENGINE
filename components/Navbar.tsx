@@ -1,0 +1,183 @@
+
+import React, { useState, useEffect } from 'react';
+import { Menu, Bell, Sun, Moon, Plus, ChevronDown } from 'lucide-react';
+import { Currency, UserRole } from '../App';
+import { motion, AnimatePresence } from 'framer-motion';
+
+interface NavbarProps {
+  onNavigate?: (page: string) => void;
+  activePage?: string;
+  compareCount?: number;
+  onOpenCompare?: () => void;
+  isAuthenticated?: boolean;
+  onLogout?: () => void;
+  user?: { name: string; role: UserRole; id: string };
+  isOffline?: boolean;
+  isDarkMode?: boolean;
+  onToggleDarkMode?: () => void;
+  notificationCount?: number;
+  currency?: Currency;
+  onToggleCurrency?: () => void;
+}
+
+const Logo: React.FC = () => (
+  <div className="flex items-center gap-4">
+    <div className="relative w-12 h-10 flex items-end">
+      <div className="absolute left-0 bottom-0 w-[24px] h-[24px] border-l-[6px] border-t-[6px] border-gray-600 rounded-tl-sm"></div>
+      <div className="absolute left-[12px] bottom-0 w-[12px] h-[20px] bg-[#007b8a] z-10 flex flex-col items-center gap-[2px] pt-[3px]">
+        <div className="w-[5px] h-[3px] bg-white/40"></div>
+        <div className="w-[5px] h-[3px] bg-white/40"></div>
+      </div>
+      <div className="absolute right-0 bottom-0 w-[26px] h-full border-r-[6px] border-t-[6px] border-[#8DC63F] rounded-tr-sm"></div>
+    </div>
+    <div className="flex flex-col justify-center leading-none">
+      <span className="text-[32px] font-black tracking-tighter text-white">SMW</span>
+      <span className="text-[10px] font-black uppercase tracking-[0.1em] text-[#8DC63F]">Building on Trust</span>
+    </div>
+  </div>
+);
+
+const SUB_SERVICES = [
+  "Land Processing",
+  "Design",
+  "Facility Management",
+  "Construction",
+  "After Sales Service & Maintenance",
+  "Specialist Finishings",
+  "Landscaping & Gardening",
+  "Decorations"
+];
+
+export const Navbar: React.FC<NavbarProps> = ({ 
+  onNavigate, activePage, isDarkMode, onToggleDarkMode, currency, onToggleCurrency
+}) => {
+  const [scrolled, setScrolled] = useState(false);
+  const [isServicesOpen, setIsServicesOpen] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  return (
+    <header className={`transition-all duration-500 ${scrolled ? 'py-4 bg-[#06080f]/95 backdrop-blur-xl border-b border-white/5' : 'py-8 bg-[#06080f]/50 backdrop-blur-sm'}`}>
+      <div className="max-w-7xl mx-auto px-6 md:px-12 flex justify-between items-center">
+        
+        {/* Left: Logo */}
+        <div className="cursor-pointer" onClick={() => onNavigate?.('home')}><Logo /></div>
+
+        {/* Center: Main Navigation Nodes (Desktop) */}
+        <nav className="hidden lg:flex items-center gap-10">
+          {['Properties', 'Projects'].map((item) => (
+            <button
+              key={item}
+              onClick={() => onNavigate?.(item.toLowerCase())}
+              className={`text-[11px] font-black uppercase tracking-[0.2em] transition-all hover:text-[#8DC63F] ${
+                activePage === item.toLowerCase() ? 'text-[#8DC63F]' : 'text-white/70'
+              }`}
+            >
+              {item}
+            </button>
+          ))}
+
+          {/* Services Dropdown Node */}
+          <div 
+            className="relative group h-full py-2"
+            onMouseEnter={() => setIsServicesOpen(true)}
+            onMouseLeave={() => setIsServicesOpen(false)}
+          >
+            <button
+              onClick={() => onNavigate?.('services')}
+              className={`text-[11px] font-black uppercase tracking-[0.2em] transition-all flex items-center gap-2 hover:text-[#8DC63F] ${
+                activePage === 'services' ? 'text-[#8DC63F]' : 'text-white/70'
+              }`}
+            >
+              Services <ChevronDown size={12} className={`transition-transform duration-300 ${isServicesOpen ? 'rotate-180 text-[#8DC63F]' : ''}`} />
+            </button>
+
+            <AnimatePresence>
+              {isServicesOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                  transition={{ duration: 0.2 }}
+                  className="absolute top-full left-1/2 -translate-x-1/2 pt-4 w-72 z-[100]"
+                >
+                  <div className="bg-[#111421] border border-white/10 rounded-[1.5rem] shadow-2xl overflow-hidden backdrop-blur-xl">
+                    <div className="p-3 grid grid-cols-1 gap-1">
+                      {SUB_SERVICES.map((sub) => (
+                        <button
+                          key={sub}
+                          onClick={() => {
+                            onNavigate?.('services');
+                            setIsServicesOpen(false);
+                          }}
+                          className="w-full text-left px-5 py-3.5 rounded-xl text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-white hover:bg-[#8DC63F]/10 transition-all border border-transparent hover:border-[#8DC63F]/20 group/sub"
+                        >
+                          <span className="group-hover/sub:translate-x-1 transition-transform inline-block">
+                            {sub}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                    <div className="bg-[#8DC63F] h-1 w-full opacity-50"></div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {['About', 'Contact'].map((item) => (
+            <button
+              key={item}
+              onClick={() => onNavigate?.(item.toLowerCase())}
+              className={`text-[11px] font-black uppercase tracking-[0.2em] transition-all hover:text-[#8DC63F] ${
+                activePage === item.toLowerCase() ? 'text-[#8DC63F]' : 'text-white/70'
+              }`}
+            >
+              {item}
+            </button>
+          ))}
+        </nav>
+
+        {/* Right: Command Controls */}
+        <div className="flex items-center gap-3 md:gap-6">
+          
+          {/* Add Listing Node - Primary CTA */}
+          <button 
+            onClick={() => onNavigate?.('add-listing')}
+            className="hidden md:flex items-center gap-2 bg-[#8DC63F] text-black px-6 py-2.5 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] hover:bg-white transition-all shadow-xl shadow-[#8DC63F]/10 border border-transparent active:scale-95"
+          >
+            <Plus size={16} strokeWidth={3} />
+            Initialize Asset
+          </button>
+          
+          {/* Notifications */}
+          <button className="relative p-2.5 text-white hover:text-[#8DC63F] transition-colors">
+            <Bell size={22} />
+          </button>
+
+          {/* Currency Selector Node */}
+          <button 
+            onClick={onToggleCurrency}
+            className="hidden sm:flex bg-white/5 px-6 py-2.5 rounded-2xl border border-white/10 text-[#8DC63F] font-black text-[12px] tracking-widest hover:bg-white/10 transition-all"
+          >
+            {currency}
+          </button>
+
+          {/* Theme Toggle */}
+          <button onClick={onToggleDarkMode} className="text-white hover:text-[#8DC63F] transition-opacity">
+            {isDarkMode ? <Sun size={22} /> : <Moon size={22} />}
+          </button>
+
+          {/* Mobile Menu Bars */}
+          <button className="text-white hover:text-[#8DC63F] transition-colors lg:hidden">
+            <Menu size={32} strokeWidth={2.5} />
+          </button>
+        </div>
+      </div>
+    </header>
+  );
+};
