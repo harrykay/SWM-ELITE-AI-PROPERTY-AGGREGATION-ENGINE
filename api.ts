@@ -22,6 +22,7 @@ const pool = new Pool({
 const initDb = async () => {
   console.log('--- DATABASE_INIT_START ---');
   try {
+    // Create table if not exists
     await pool.query(`
       CREATE TABLE IF NOT EXISTS properties (
         id SERIAL PRIMARY KEY,
@@ -35,15 +36,25 @@ const initDb = async () => {
         size INTEGER DEFAULT 0,
         images TEXT[] DEFAULT '{}',
         status TEXT DEFAULT 'available',
-        host JSONB DEFAULT '{}',
-        address JSONB DEFAULT '{}',
-        features JSONB DEFAULT '{}',
-        is_featured BOOLEAN DEFAULT false,
-        rating NUMERIC DEFAULT 0,
-        reviews_count INTEGER DEFAULT 0,
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       );
     `);
+
+    // Run Migrations (Add missing columns to existing table)
+    const migrations = [
+      "ALTER TABLE properties ADD COLUMN IF NOT EXISTS host JSONB DEFAULT '{}'",
+      "ALTER TABLE properties ADD COLUMN IF NOT EXISTS address JSONB DEFAULT '{}'",
+      "ALTER TABLE properties ADD COLUMN IF NOT EXISTS features JSONB DEFAULT '{}'",
+      "ALTER TABLE properties ADD COLUMN IF NOT EXISTS is_featured BOOLEAN DEFAULT false",
+      "ALTER TABLE properties ADD COLUMN IF NOT EXISTS rating NUMERIC DEFAULT 0",
+      "ALTER TABLE properties ADD COLUMN IF NOT EXISTS reviews_count INTEGER DEFAULT 0",
+      "ALTER TABLE properties ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'available'"
+    ];
+
+    for (const sql of migrations) {
+      await pool.query(sql);
+    }
+
     console.log('--- DATABASE_TABLES_VERIFIED ---');
   } catch (err) {
     console.error('--- DATABASE_INIT_ERROR ---', err);
