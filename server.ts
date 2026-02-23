@@ -6,6 +6,7 @@ import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
+console.log('--- SERVER_INITIALIZING ---');
 dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
@@ -23,21 +24,27 @@ async function startServer() {
   // PostgreSQL Connection
   const pool = new Pool({
     connectionString: process.env.DATABASE_URL || 'postgres://postgres:f6vTwdfWoS0tvuXY9g5t7ZiZaKBBEqp2wz15muYcNKZEhni8ICzM9OGGY3N9nAPM@173.249.14.116:5432/postgres',
-    ssl: false // Set to true if your DB requires SSL
+    ssl: false,
+    connectionTimeoutMillis: 5000, // Don't hang forever
   });
 
-  // Test DB Connection
-  pool.query('SELECT NOW()', (err, res) => {
+  // Test DB Connection without crashing
+  pool.connect((err, client, release) => {
     if (err) {
-      console.error('DATABASE_CONNECTION_ERROR:', err);
+      console.error('CRITICAL_DATABASE_ERROR: Could not connect to PostgreSQL. Check your DATABASE_URL and network permissions.', err.stack);
     } else {
-      console.log('DATABASE_CONNECTED_SUCCESSFULLY:', res.rows[0]);
+      console.log('DATABASE_CONNECTED: Successfully established connection to PostgreSQL node.');
+      release();
     }
   });
 
   // API Routes
   app.get('/api/health', (req, res) => {
-    res.json({ status: 'ok', database: 'connected' });
+    res.status(200).json({ 
+      status: 'active', 
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || 'development'
+    });
   });
 
   // Example API: Fetch Properties
@@ -68,11 +75,19 @@ async function startServer() {
 
   // Vite middleware for development
   if (process.env.NODE_ENV !== 'production') {
-    const vite = await createViteServer({
-      server: { middlewareMode: true },
-      appType: 'spa',
-    });
-    app.use(vite.middlewares);
+    try {
+      console.log('--- INITIALIZING_VITE_MIDDLEWARE ---');
+      const vite = await createViteServer({
+        server: { middlewareMode: true },
+        appType: 'spa',
+      });
+      app.use(vite.middlewares);
+      console.log('--- VITE_MIDDLEWARE_READY ---');
+    } catch (viteError) {
+      console.error('VITE_INITIALIZATION_ERROR:', viteError);
+      // In case of Vite error, we still want the API to work
+      app.get('/', (req, res) => res.send('Vite is initializing or failed. API is active.'));
+    }
   } else {
     // Serve static files in production
     app.use(express.static(path.join(__dirname, 'dist')));
