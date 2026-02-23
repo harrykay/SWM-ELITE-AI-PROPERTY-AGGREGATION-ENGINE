@@ -2,10 +2,12 @@ import express from 'express';
 import pg from 'pg';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import { GoogleGenAI } from "@google/genai";
 
 dotenv.config();
 
 const { Pool } = pg;
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
 
 const app = express();
 app.use(cors());
@@ -71,10 +73,53 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+app.get('/api/properties/latest', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM properties ORDER BY created_at DESC LIMIT 6');
+    const properties = result.rows;
+
+    // Enhance with AI summaries
+    const enhancedProperties = await Promise.all(properties.map(async (prop) => {
+      try {
+        const response = await ai.models.generateContent({
+          model: "gemini-3-flash-preview",
+          contents: `Summarize this real estate property in Uganda in exactly one engaging sentence (max 15 words): ${prop.description}`,
+          config: { temperature: 0.7 }
+        });
+        return { ...prop, aiSummary: response.text?.trim() || prop.description.substring(0, 100) + '...' };
+      } catch (err) {
+        return { ...prop, aiSummary: prop.description.substring(0, 100) + '...' };
+      }
+    }));
+
+    res.json(enhancedProperties);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
 app.get('/api/properties', async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM properties ORDER BY created_at DESC');
-    res.json(result.rows);
+    const properties = result.rows;
+
+    // Enhance with AI summaries
+    const enhancedProperties = await Promise.all(properties.map(async (prop) => {
+      try {
+        // Only generate if not already present or as a fallback
+        const response = await ai.models.generateContent({
+          model: "gemini-3-flash-preview",
+          contents: `Summarize this real estate property in Uganda in exactly one engaging sentence (max 15 words): ${prop.description}`,
+          config: { temperature: 0.7 }
+        });
+        return { ...prop, aiSummary: response.text?.trim() || prop.description.substring(0, 100) + '...' };
+      } catch (err) {
+        return { ...prop, aiSummary: prop.description.substring(0, 100) + '...' };
+      }
+    }));
+
+    res.json(enhancedProperties);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Internal Server Error' });

@@ -359,6 +359,17 @@ export const PropertiesPage: React.FC<PropertiesPageProps> = ({
 
                 <div className="p-5 sm:p-6 md:p-10 flex flex-col flex-1">
                   <h3 className="text-xl md:text-2xl font-black text-gray-900 dark:text-white mb-2.5 md:mb-4 group-hover:text-[#8DC63F] transition-colors leading-tight uppercase tracking-tight">{property.title}</h3>
+                  
+                  {/* AI Summary Badge */}
+                  {property.aiSummary && (
+                    <div className="mb-4 p-3 bg-[#8DC63F]/5 border border-[#8DC63F]/10 rounded-xl flex items-start gap-2.5">
+                      <Sparkles size={14} className="text-[#8DC63F] shrink-0 mt-0.5" />
+                      <p className="text-[11px] text-gray-500 dark:text-gray-400 font-medium italic leading-relaxed">
+                        {property.aiSummary}
+                      </p>
+                    </div>
+                  )}
+
                   <div className="text-[#8DC63F] text-2xl md:text-3xl font-black mb-5 md:mb-8 tracking-tighter">
                     {formatPrice(property.price, currency)}
                     {property.status === 'for rent' && <span className="text-[10px] font-black text-gray-400 dark:text-gray-500 ml-1.5 tracking-[0.3em]">/ MO</span>}

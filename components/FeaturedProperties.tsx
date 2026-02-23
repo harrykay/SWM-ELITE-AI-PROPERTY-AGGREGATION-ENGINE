@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { MapPin, Maximize, Bed, Car, ArrowRight } from 'lucide-react';
+import { MapPin, Maximize, Bed, Car, ArrowRight, Sparkles } from 'lucide-react';
 import { Currency, formatPrice } from '../App';
 
 const featuredProperties = [
@@ -86,8 +86,13 @@ export const FeaturedProperties: React.FC<FeaturedPropertiesProps> = ({ currency
 
               <div className="flex-1 space-y-4">
                 <h3 className="text-2xl font-black tracking-tight">{p.title}</h3>
-                <p className="text-gray-500 text-sm line-clamp-2 max-w-xl">
-                  Premium luxury living at its finest. This property features cutting-edge amenities and modern architectural design elements.
+                
+                {/* AI Summary */}
+                <div className="flex items-center gap-2 text-[#8DC63F] text-[10px] font-black uppercase tracking-widest">
+                  <Sparkles size={12} /> AI Insight
+                </div>
+                <p className="text-gray-400 text-sm italic leading-relaxed border-l-2 border-[#8DC63F]/30 pl-4">
+                  "Premium luxury living at its finest. This property features cutting-edge amenities and modern architectural design elements."
                 </p>
                 
                 <div className="flex flex-wrap gap-8 pt-4">

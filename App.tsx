@@ -29,6 +29,7 @@ import { ComparisonModal } from './components/ComparisonModal';
 import { VoiceAssistant } from './components/VoiceAssistant';
 import { LoginPage } from './components/LoginPage';
 import { ProjectsPage } from './components/ProjectsPage';
+import { PropertyFeed } from './components/PropertyFeed';
 import { Repeat, AlertTriangle, RefreshCw } from 'lucide-react';
 
 // --- Global Error Boundary ---
@@ -135,6 +136,7 @@ export interface Property {
   reviewsCount?: number;
   bedrooms?: number;
   isGuestFavorite?: boolean;
+  aiSummary?: string;
 }
 
 // Fix: Export missing Service and AboutContent interfaces
@@ -245,6 +247,7 @@ const App: React.FC = () => {
               <WhoWeAre />
               <PartnerLogos />
               <FeaturedProperties currency={currency} />
+              <PropertyFeed currency={currency} onPropertyClick={(id) => handleNavigate('single-property', { id })} />
               <Testimonials />
               <FAQ />
               <CTA />
