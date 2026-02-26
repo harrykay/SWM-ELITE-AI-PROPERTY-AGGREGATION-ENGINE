@@ -87,7 +87,8 @@ export const Footer: React.FC = () => {
                 <div>
                   <p className="text-[9px] font-black uppercase tracking-widest text-gray-600 mb-1">Global HQ</p>
                   <p className="text-gray-400 text-sm leading-relaxed font-bold">
-                    Plot 101/7 Butikiro Road<br />Rubaga, Kampala, UG
+                    MUTEC Building, Plot 101/7 Butikiro Road<br />
+                    Namirembe/ Rubaga P.o.Box.30880, Kampala
                   </p>
                 </div>
               </li>
@@ -97,7 +98,10 @@ export const Footer: React.FC = () => {
                 </div>
                 <div>
                   <p className="text-[9px] font-black uppercase tracking-widest text-gray-600 mb-1">Voice Link</p>
-                  <a href="tel:+256414270703" className="text-gray-400 hover:text-white text-sm font-black transition-colors">+256 414 270 703</a>
+                  <div className="flex flex-col">
+                    <a href="tel:+256414270703" className="text-gray-400 hover:text-white text-sm font-black transition-colors">+256 414 270 703</a>
+                    <a href="tel:+256772456150" className="text-gray-400 hover:text-white text-xs font-black transition-colors">+256 772 456 150</a>
+                  </div>
                 </div>
               </li>
               <li className="flex items-center gap-5 group">

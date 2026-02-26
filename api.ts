@@ -40,6 +40,72 @@ const initDb = async () => {
         status TEXT DEFAULT 'available',
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       );
+
+      CREATE TABLE IF NOT EXISTS pages (
+        id SERIAL PRIMARY KEY,
+        title TEXT NOT NULL,
+        slug TEXT UNIQUE NOT NULL,
+        content TEXT,
+        status TEXT DEFAULT 'draft',
+        layout TEXT DEFAULT 'default',
+        meta_description TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE TABLE IF NOT EXISTS posts (
+        id SERIAL PRIMARY KEY,
+        title TEXT NOT NULL,
+        slug TEXT UNIQUE NOT NULL,
+        content TEXT,
+        excerpt TEXT,
+        type TEXT DEFAULT 'blog',
+        status TEXT DEFAULT 'draft',
+        author_id INTEGER,
+        category_id INTEGER,
+        featured_image TEXT,
+        tags TEXT[] DEFAULT '{}',
+        published_at TIMESTAMP WITH TIME ZONE,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE TABLE IF NOT EXISTS categories (
+        id SERIAL PRIMARY KEY,
+        name TEXT NOT NULL,
+        slug TEXT UNIQUE NOT NULL,
+        type TEXT DEFAULT 'blog'
+      );
+
+      CREATE TABLE IF NOT EXISTS media (
+        id SERIAL PRIMARY KEY,
+        filename TEXT NOT NULL,
+        url TEXT NOT NULL,
+        mime_type TEXT,
+        size INTEGER,
+        alt_text TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE TABLE IF NOT EXISTS menus (
+        id SERIAL PRIMARY KEY,
+        name TEXT NOT NULL,
+        location TEXT UNIQUE NOT NULL
+      );
+
+      CREATE TABLE IF NOT EXISTS menu_items (
+        id SERIAL PRIMARY KEY,
+        menu_id INTEGER REFERENCES menus(id) ON DELETE CASCADE,
+        parent_id INTEGER,
+        title TEXT NOT NULL,
+        url TEXT NOT NULL,
+        order_index INTEGER DEFAULT 0
+      );
+
+      CREATE TABLE IF NOT EXISTS cms_settings (
+        key TEXT PRIMARY KEY,
+        value JSONB NOT NULL
+      );
     `);
 
     // Run Migrations (Add missing columns to existing table)
@@ -71,6 +137,116 @@ app.get('/api/health', (req, res) => {
     timestamp: new Date().toISOString(),
     database: 'PostgreSQL'
   });
+});
+
+// CMS Settings
+app.get('/api/cms/settings', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM cms_settings');
+    const settings = result.rows.reduce((acc, row) => ({ ...acc, [row.key]: row.value }), {});
+    res.json(settings);
+  } catch (err) {
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+app.post('/api/cms/settings', async (req, res) => {
+  const settings = req.body;
+  try {
+    for (const [key, value] of Object.entries(settings)) {
+      await pool.query(
+        'INSERT INTO cms_settings (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value = $2',
+        [key, JSON.stringify(value)]
+      );
+    }
+    res.json({ status: 'ok' });
+  } catch (err) {
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+// Pages
+app.get('/api/cms/pages', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM pages ORDER BY created_at DESC');
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+app.post('/api/cms/pages', async (req, res) => {
+  const { title, slug, content, status, layout, meta_description } = req.body;
+  try {
+    const result = await pool.query(
+      'INSERT INTO pages (title, slug, content, status, layout, meta_description) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
+      [title, slug, content, status, layout, meta_description]
+    );
+    res.status(201).json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+// Posts
+app.get('/api/cms/posts', async (req, res) => {
+  const { type = 'blog' } = req.query;
+  try {
+    const result = await pool.query('SELECT * FROM posts WHERE type = $1 ORDER BY created_at DESC', [type]);
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+app.post('/api/cms/posts', async (req, res) => {
+  const { title, slug, content, excerpt, type, status, featured_image, tags, published_at } = req.body;
+  try {
+    const result = await pool.query(
+      'INSERT INTO posts (title, slug, content, excerpt, type, status, featured_image, tags, published_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *',
+      [title, slug, content, excerpt, type, status, featured_image, tags, published_at]
+    );
+    res.status(201).json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+// Media
+app.get('/api/cms/media', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM media ORDER BY created_at DESC');
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+app.post('/api/cms/media', async (req, res) => {
+  const { filename, url, mime_type, size, alt_text } = req.body;
+  try {
+    const result = await pool.query(
+      'INSERT INTO media (filename, url, mime_type, size, alt_text) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+      [filename, url, mime_type, size, alt_text]
+    );
+    res.status(201).json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+// Menus
+app.get('/api/cms/menus', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM menus');
+    const menus = await Promise.all(result.rows.map(async (menu) => {
+      const items = await pool.query('SELECT * FROM menu_items WHERE menu_id = $1 ORDER BY order_index ASC', [menu.id]);
+      return { ...menu, items: items.rows };
+    }));
+    res.json(menus);
+  } catch (err) {
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
 });
 
 app.get('/api/properties/latest', async (req, res) => {

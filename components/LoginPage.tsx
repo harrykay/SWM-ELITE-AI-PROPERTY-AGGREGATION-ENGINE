@@ -63,7 +63,7 @@ const REGISTRATION_ROLES: RoleOption[] = [
 ];
 
 const SAMPLE_USERS = [
-  { email: 'admin@smw.co.ug', password: 'password123', role: 'admin' as const, name: 'Master Architect' },
+  { email: 'admin@smw.co.ug', password: 'password123', role: 'admin' as const, name: 'Portfolio Lead' },
   { email: 'seller@smw.co.ug', password: 'password123', role: 'seller' as const, name: 'Premium Developer' },
   { email: 'buyer@smw.co.ug', password: 'password123', role: 'buyer' as const, name: 'Asset Seeker' },
   { email: 'tenant@smw.co.ug', password: 'password123', role: 'tenant' as const, name: 'Resident Node' },

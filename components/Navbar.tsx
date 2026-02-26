@@ -5,7 +5,7 @@ import { Currency, UserRole } from '../App';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface NavbarProps {
-  onNavigate?: (page: string) => void;
+  onNavigate?: (page: string, params?: any) => void;
   activePage?: string;
   compareCount?: number;
   onOpenCompare?: () => void;
@@ -18,6 +18,8 @@ interface NavbarProps {
   notificationCount?: number;
   currency?: Currency;
   onToggleCurrency?: () => void;
+  cmsPages?: any[];
+  cmsMenus?: any[];
 }
 
 const Logo: React.FC = () => (
@@ -49,10 +51,11 @@ const SUB_SERVICES = [
 ];
 
 export const Navbar: React.FC<NavbarProps> = ({ 
-  onNavigate, activePage, isDarkMode, onToggleDarkMode, currency, onToggleCurrency
+  onNavigate, activePage, isDarkMode, onToggleDarkMode, currency, onToggleCurrency, cmsPages = [], cmsMenus = []
 }) => {
   const [scrolled, setScrolled] = useState(false);
   const [isServicesOpen, setIsServicesOpen] = useState(false);
+  const [isPagesOpen, setIsPagesOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -140,6 +143,49 @@ export const Navbar: React.FC<NavbarProps> = ({
               {item}
             </button>
           ))}
+
+          {/* Dynamic Pages Dropdown */}
+          {cmsPages.length > 0 && (
+            <div 
+              className="relative group h-full py-2"
+              onMouseEnter={() => setIsPagesOpen(true)}
+              onMouseLeave={() => setIsPagesOpen(false)}
+            >
+              <button
+                className="text-[11px] font-black uppercase tracking-[0.2em] transition-all flex items-center gap-2 text-white/70 hover:text-[#8DC63F]"
+              >
+                More <ChevronDown size={12} className={`transition-transform duration-300 ${isPagesOpen ? 'rotate-180 text-[#8DC63F]' : ''}`} />
+              </button>
+
+              <AnimatePresence>
+                {isPagesOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    className="absolute top-full left-1/2 -translate-x-1/2 pt-4 w-64 z-[100]"
+                  >
+                    <div className="bg-[#111421] border border-white/10 rounded-[1.5rem] shadow-2xl overflow-hidden backdrop-blur-xl">
+                      <div className="p-3 grid grid-cols-1 gap-1">
+                        {cmsPages.map((page) => (
+                          <button
+                            key={page.id}
+                            onClick={() => {
+                              onNavigate?.('dynamic', { id: page.id });
+                              setIsPagesOpen(false);
+                            }}
+                            className="w-full text-left px-5 py-3.5 rounded-xl text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-white hover:bg-[#8DC63F]/10 transition-all border border-transparent hover:border-[#8DC63F]/20"
+                          >
+                            {page.title}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          )}
         </nav>
 
         {/* Right: Command Controls */}

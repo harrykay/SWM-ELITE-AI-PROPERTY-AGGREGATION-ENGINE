@@ -29,7 +29,7 @@ export const DashboardHub: React.FC<DashboardHubProps> = ({
   ];
 
   return (
-    <div className="flex h-screen bg-[#020408] text-gray-100 overflow-hidden pt-20">
+    <div className="flex h-screen bg-[#020408] text-gray-100 overflow-hidden">
       <aside className="w-72 bg-[#06080f] border-r border-white/5 flex flex-col h-full z-[60] shrink-0 transition-all">
         <div className="p-7 flex items-center justify-between border-b border-white/5">
            <div className="flex items-center gap-2">

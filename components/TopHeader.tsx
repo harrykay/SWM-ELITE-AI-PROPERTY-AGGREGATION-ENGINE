@@ -26,7 +26,7 @@ export const TopHeader: React.FC<TopHeaderProps> = ({ onNavigate, isAuthenticate
             <div className="w-6 h-6 bg-white/5 rounded-lg flex items-center justify-center text-[#8DC63F] group-hover:bg-[#8DC63F] group-hover:text-black transition-all">
               <Mail size={12} />
             </div>
-            <span className="text-[10px] font-black uppercase text-gray-500 tracking-widest">info@smw.co.ug</span>
+            <span className="text-[10px] font-black uppercase text-gray-500 tracking-widest">INFO@SMW.CO.UG</span>
           </div>
         </div>
 
@@ -47,7 +47,7 @@ export const TopHeader: React.FC<TopHeaderProps> = ({ onNavigate, isAuthenticate
                   className="flex items-center gap-2 text-[10px] font-black uppercase text-[#8DC63F] tracking-[0.2em] hover:text-white transition-colors"
                 >
                   <LayoutDashboard size={14} />
-                  Dashboard
+                  DASHBOARD
                 </button>
                 <button 
                   onClick={onLogout}
@@ -56,11 +56,18 @@ export const TopHeader: React.FC<TopHeaderProps> = ({ onNavigate, isAuthenticate
                   <LogOut size={14} />
                   Terminate Session
                 </button>
-                <div className="flex items-center gap-3 bg-white/5 px-4 py-1.5 rounded-full border border-white/5">
-                  <div className="w-4 h-4 rounded-full bg-[#8DC63F]/20 flex items-center justify-center text-[#8DC63F]">
-                    <User size={10} />
+                <div className="flex items-center gap-3 bg-black/40 px-5 py-2 rounded-2xl border border-white/10 shadow-2xl">
+                  <div className="w-8 h-8 rounded-full bg-[#8DC63F]/10 flex items-center justify-center text-[#8DC63F] border border-[#8DC63F]/20">
+                    <User size={14} />
                   </div>
-                  <span className="text-[9px] font-black uppercase text-white tracking-widest">{user?.name}</span>
+                  <div className="flex flex-col leading-tight">
+                    <span className="text-[10px] font-black uppercase text-white tracking-widest leading-none">
+                      {user?.name.split(' ')[0]}
+                    </span>
+                    <span className="text-[10px] font-black uppercase text-white tracking-widest leading-none">
+                      {user?.name.split(' ')[1]}
+                    </span>
+                  </div>
                 </div>
               </>
             ) : (

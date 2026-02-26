@@ -30,6 +30,7 @@ import { VoiceAssistant } from './components/VoiceAssistant';
 import { LoginPage } from './components/LoginPage';
 import { ProjectsPage } from './components/ProjectsPage';
 import { PropertyFeed } from './components/PropertyFeed';
+import { DynamicPage } from './components/DynamicPage';
 import { Repeat, AlertTriangle, RefreshCw } from 'lucide-react';
 
 // --- Global Error Boundary ---
@@ -190,16 +191,103 @@ const INITIAL_PROPERTIES: Property[] = [
   }
 ];
 
+const INITIAL_PROJECTS: Project[] = [
+  {
+    id: 'p1',
+    title: 'Kololo Residency Interior',
+    location: 'Kololo, Kampala',
+    status: 'completed',
+    image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80',
+    category: 'Interior Design',
+    description: 'A complete interior overhaul for a luxury penthouse in Kololo. The project involved custom cabinetry, high-end lighting fixtures, and premium marble finishes. Our team worked closely with the client to create a space that is both functional and aesthetically stunning.',
+    client: 'Private Investor',
+    surfaceArea: '320 m²',
+    value: 'Shs 450M',
+    architect: 'SMW Design Studio',
+    timeline: 'Jan 2023 - June 2023',
+    requirements: [
+      'Custom marble flooring throughout',
+      'Smart lighting integration',
+      'Italian kitchen cabinetry',
+      'Climate control optimization'
+    ],
+    gallery: [
+      'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=800&q=80'
+    ]
+  },
+  {
+    id: 'p2',
+    title: 'Naguru Modern Kitchen',
+    location: 'Naguru, Kampala',
+    status: 'completed',
+    image: 'https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&w=1200&q=80',
+    category: 'Renovation',
+    description: 'Modern kitchen installation with high-end finishes and custom cabinetry. We transformed an outdated kitchen into a state-of-the-art culinary space featuring integrated appliances and a massive waterfall island.',
+    client: 'Residential Client',
+    surfaceArea: '45 m²',
+    value: 'Shs 85M',
+    architect: 'SMW Interior Team',
+    timeline: 'Mar 2023 - May 2023',
+    requirements: [
+      'Integrated Bosch appliances',
+      'Quartz countertops',
+      'Soft-close cabinetry',
+      'LED ambient lighting'
+    ]
+  },
+  {
+    id: 'p3',
+    title: 'Entebbe Lakeside Villa',
+    location: 'Entebbe',
+    status: 'ongoing',
+    image: 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=1200&q=80',
+    category: 'Construction',
+    description: 'Ongoing construction of a 5-bedroom luxury villa overlooking Lake Victoria. This project utilizes advanced structural engineering to maximize views while maintaining structural integrity on the sloping lakeside terrain.',
+    client: 'International Client',
+    surfaceArea: '1,200 m²',
+    value: 'Shs 2.4B',
+    architect: 'SMW Architecture',
+    timeline: 'Sept 2023 - Present',
+    requirements: [
+      'Reinforced concrete structure',
+      'Infinity pool overlooking the lake',
+      'Sustainable water harvesting system',
+      'Solar energy grid integration'
+    ]
+  }
+];
+
 const App: React.FC = () => {
-  const [currentPage, setCurrentPage] = useState<'home' | 'properties' | 'projects' | 'services' | 'dashboard' | 'about' | 'contact' | 'login' | 'manage-content' | 'single-project' | 'single-property' | 'add-listing'>('home');
+  const [currentPage, setCurrentPage] = useState<'home' | 'properties' | 'projects' | 'services' | 'dashboard' | 'about' | 'contact' | 'login' | 'manage-content' | 'single-project' | 'single-property' | 'add-listing' | 'dynamic'>('home');
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(null);
+  const [selectedPageId, setSelectedPageId] = useState<number | null>(null);
   const [properties, setProperties] = useState<Property[]>(INITIAL_PROPERTIES);
-  const [projects, setProjects] = useState<Project[]>([]);
+  const [projects, setProjects] = useState<Project[]>(INITIAL_PROJECTS);
   const [settings, setSettings] = useState<AppSettings>(INITIAL_SETTINGS);
   const [auth, setAuth] = useState<{ user: UserProfile } | null>(null);
   const [currency, setCurrency] = useState<Currency>('UGX');
   const [isDarkMode, setIsDarkMode] = useState(true);
+  const [cmsSettings, setCmsSettings] = useState<any>({});
+  const [cmsPages, setCmsPages] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchCmsData = async () => {
+      try {
+        const [settingsRes, pagesRes] = await Promise.all([
+          fetch('/api/cms/settings'),
+          fetch('/api/cms/pages')
+        ]);
+        if (settingsRes.ok) setCmsSettings(await settingsRes.json());
+        if (pagesRes.ok) setCmsPages(await pagesRes.json());
+      } catch (err) {
+        console.error('FETCH_CMS_DATA_ERROR:', err);
+      }
+    };
+    fetchCmsData();
+  }, []);
 
   useEffect(() => {
     const fetchProperties = async () => {
@@ -222,6 +310,7 @@ const App: React.FC = () => {
     const p = page.toLowerCase().trim().replace(/\s+/g, '-');
     if (p === 'single-project') { setSelectedProjectId(params?.id); setCurrentPage('single-project'); }
     else if (p === 'single-property') { setSelectedPropertyId(params?.id); setCurrentPage('single-property'); }
+    else if (p === 'dynamic') { setSelectedPageId(params?.id); setCurrentPage('dynamic'); }
     else { setCurrentPage(p as any); }
     window.scrollTo(0, 0);
   }, []);
@@ -231,31 +320,67 @@ const App: React.FC = () => {
     handleNavigate('dashboard');
   };
 
+  const isDashboard = ['dashboard', 'manage-content', 'add-listing'].includes(currentPage);
+
   return (
     <GlobalErrorBoundary>
       <div className={`min-h-screen transition-colors duration-500 ${isDarkMode ? 'bg-[#06080f] text-gray-100' : 'bg-white text-gray-900'}`} style={{ fontFamily: settings.fontFamily }}>
-        <div className="fixed top-0 left-0 right-0 z-50">
-          <TopHeader onNavigate={handleNavigate} isAuthenticated={!!auth} user={auth?.user} onLogout={() => setAuth(null)} />
-          <Navbar onNavigate={handleNavigate} activePage={currentPage} currency={currency} onToggleCurrency={() => setCurrency(c => c === 'UGX' ? 'USD' : 'UGX')} onToggleDarkMode={() => setIsDarkMode(!isDarkMode)} isDarkMode={isDarkMode} />
-        </div>
         
-        <main>
+        {!isDashboard && (
+          <div className="fixed top-0 left-0 right-0 z-50">
+            <TopHeader onNavigate={handleNavigate} isAuthenticated={!!auth} user={auth?.user} onLogout={() => setAuth(null)} />
+            <Navbar 
+              onNavigate={handleNavigate} 
+              activePage={currentPage} 
+              currency={currency} 
+              onToggleCurrency={() => setCurrency(c => c === 'UGX' ? 'USD' : 'UGX')} 
+              onToggleDarkMode={() => setIsDarkMode(!isDarkMode)} 
+              isDarkMode={isDarkMode}
+              cmsPages={cmsPages}
+              cmsMenus={[]}
+            />
+          </div>
+        )}
+        
+        <main className={!isDashboard ? "pt-0" : ""}>
           {currentPage === 'home' && (
             <div className="animate-in fade-in duration-1000">
               <Hero currency={currency} />
-              <EcosystemGrid />
-              <WhoWeAre />
+              {cmsSettings.showEcosystem !== false && <EcosystemGrid />}
+              {cmsSettings.showWhoWeAre !== false && <WhoWeAre />}
               <PartnerLogos />
-              <FeaturedProperties currency={currency} />
+              {cmsSettings.showFeatured !== false && <FeaturedProperties currency={currency} />}
               <PropertyFeed currency={currency} onPropertyClick={(id) => handleNavigate('single-property', { id })} />
-              <Testimonials />
-              <FAQ />
+              {cmsSettings.showTestimonials !== false && <Testimonials />}
+              {cmsSettings.showFAQ !== false && <FAQ />}
               <CTA />
             </div>
           )}
           {currentPage === 'login' && <LoginPage onLogin={handleLogin} />}
           {currentPage === 'properties' && <PropertiesPage properties={properties} onPropertyClick={(id) => handleNavigate('single-property', { id })} currency={currency} />}
           {currentPage === 'projects' && <ProjectsPage projects={projects} onProjectClick={(id) => handleNavigate('single-project', { id })} />}
+          {currentPage === 'about' && (
+            <AboutPage content={{
+              whoWeAre: "SMW Construction Developers is a premier real estate and construction firm based in Uganda.",
+              background: "Founded in 1950, we have decades of experience in delivering high-quality infrastructure.",
+              mission: "To provide innovative and sustainable architectural solutions.",
+              vision: "To be the leading property ecosystem in East Africa."
+            }} />
+          )}
+          {currentPage === 'contact' && <ContactPage />}
+          {currentPage === 'services' && (
+            <ServicesPage services={[
+              { id: '1', title: 'Construction', description: 'High-quality building services.', details: ['Residential', 'Commercial'] },
+              { id: '2', title: 'Design', description: 'Architectural design and planning.', details: ['3D Modeling', 'Blueprints'] }
+            ]} />
+          )}
+          {currentPage === 'add-listing' && auth?.user && (
+            <AddListingPage 
+              userRole={auth.user.role} 
+              currency={currency} 
+              onAddProperty={(p) => setProperties(prev => [p, ...prev])} 
+            />
+          )}
           {currentPage === 'dashboard' && auth?.user && (
             <DashboardHub 
               userRole={auth.user.role} onRoleChange={() => {}} properties={properties} currency={currency} 
@@ -271,8 +396,12 @@ const App: React.FC = () => {
           )}
           {currentPage === 'single-project' && <SingleProjectPage project={projects.find(p => p.id === selectedProjectId) || projects[0]} />}
           {currentPage === 'single-property' && <SinglePropertyPage property={properties.find(p => p.id === selectedPropertyId) || properties[0]} currency={currency} />}
+          {currentPage === 'dynamic' && selectedPageId && (
+            <DynamicPage page={cmsPages.find(p => p.id === selectedPageId)} />
+          )}
         </main>
-        <Footer />
+
+        {!isDashboard && <Footer />}
         <VoiceAssistant />
       </div>
     </GlobalErrorBoundary>
