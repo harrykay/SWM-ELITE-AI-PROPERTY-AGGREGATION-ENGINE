@@ -18,15 +18,18 @@ interface ManageDashboardProps {
   onUpdateSettings: (s: AppSettings) => void;
   properties: Property[];
   onUpdateProperty: (p: Property) => void;
+  onDeleteProperty: (id: string) => void;
   projects: Project[];
   onUpdateProject: (p: Project) => void;
   onAddProject: (p: Project) => void;
+  onDeleteProject: (id: string) => void;
+  onNavigate: (page: string) => void;
 }
 
 type MainTab = 'properties' | 'projects' | 'users' | 'finance' | 'subscriptions' | 'settings' | 'cms';
 
 export const ManageDashboard: React.FC<ManageDashboardProps> = ({ 
-  settings, onUpdateSettings, properties, onUpdateProperty, projects, onUpdateProject, onAddProject 
+  settings, onUpdateSettings, properties, onUpdateProperty, onDeleteProperty, projects, onUpdateProject, onAddProject, onDeleteProject, onNavigate 
 }) => {
   const [activeTab, setActiveTab] = useState<MainTab>('settings');
   const [subTab, setSubTab] = useState('general');
@@ -221,11 +224,79 @@ export const ManageDashboard: React.FC<ManageDashboardProps> = ({
               </div>
             )}
 
+            {activeTab === 'projects' && (
+              <div className="bg-[#111421] rounded-[3rem] border border-white/5 p-10">
+                <div className="flex justify-between items-center mb-10">
+                  <h3 className="text-2xl font-black text-white uppercase tracking-tighter">Project Portfolio</h3>
+                  <button 
+                    onClick={() => onNavigate('add-project')}
+                    className="bg-[#8DC63F] text-black px-8 py-3 rounded-xl font-black uppercase text-[10px] tracking-widest shadow-xl shadow-[#8DC63F]/20 flex items-center gap-2"
+                  >
+                    <Plus size={16} /> New Project Node
+                  </button>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left">
+                    <thead>
+                      <tr className="border-b border-white/5">
+                        <th className="pb-6 text-[10px] font-black uppercase tracking-[0.3em] text-gray-500">Project Identity</th>
+                        <th className="pb-6 text-[10px] font-black uppercase tracking-[0.3em] text-gray-500">Location</th>
+                        <th className="pb-6 text-[10px] font-black uppercase tracking-[0.3em] text-gray-500">Category</th>
+                        <th className="pb-6 text-[10px] font-black uppercase tracking-[0.3em] text-gray-500">Status</th>
+                        <th className="pb-6 text-[10px] font-black uppercase tracking-[0.3em] text-gray-500">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-white/5">
+                      {projects.map(p => (
+                        <tr key={p.id} className="group hover:bg-white/5 transition-colors">
+                          <td className="py-6 pr-4">
+                            <div className="flex items-center gap-4">
+                              <div className="w-12 h-12 rounded-xl overflow-hidden shrink-0">
+                                <img src={p.image} className="w-full h-full object-cover" />
+                              </div>
+                              <span className="text-sm font-black text-white uppercase tracking-tight">{p.title}</span>
+                            </div>
+                          </td>
+                          <td className="py-6 text-gray-500 text-[10px] font-bold uppercase tracking-widest">{p.location}</td>
+                          <td className="py-6 text-white font-black text-sm uppercase tracking-widest text-[10px]">{p.category}</td>
+                          <td className="py-6">
+                            <span className={`px-3 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest ${
+                              p.status === 'completed' ? 'bg-green-500/10 text-green-500' : 'bg-yellow-500/10 text-yellow-500'
+                            }`}>
+                              {p.status}
+                            </span>
+                          </td>
+                          <td className="py-6">
+                            <div className="flex items-center gap-2">
+                              <button className="p-2 bg-white/5 rounded-lg text-gray-500 hover:text-white transition-all"><Edit3 size={16} /></button>
+                              <button 
+                                onClick={() => {
+                                  if (confirm('Are you sure you want to decommission this project node?')) {
+                                    onDeleteProject(p.id);
+                                  }
+                                }}
+                                className="p-2 bg-white/5 rounded-lg text-gray-500 hover:text-red-500 transition-all"
+                              >
+                                <Trash2 size={16} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
             {activeTab === 'users' && (
               <div className="bg-[#111421] rounded-[3rem] border border-white/5 p-10">
                 <div className="flex justify-between items-center mb-10">
                   <h3 className="text-2xl font-black text-white uppercase tracking-tighter">Property Ledger</h3>
-                  <button className="bg-[#8DC63F] text-black px-8 py-3 rounded-xl font-black uppercase text-[10px] tracking-widest shadow-xl shadow-[#8DC63F]/20 flex items-center gap-2">
+                  <button 
+                    onClick={() => onNavigate('add-listing')}
+                    className="bg-[#8DC63F] text-black px-8 py-3 rounded-xl font-black uppercase text-[10px] tracking-widest shadow-xl shadow-[#8DC63F]/20 flex items-center gap-2"
+                  >
                     <Plus size={16} /> New Asset Node
                   </button>
                 </div>
@@ -259,7 +330,16 @@ export const ManageDashboard: React.FC<ManageDashboardProps> = ({
                           <td className="py-6">
                             <div className="flex items-center gap-2">
                               <button className="p-2 bg-white/5 rounded-lg text-gray-500 hover:text-white transition-all"><Edit3 size={16} /></button>
-                              <button className="p-2 bg-white/5 rounded-lg text-gray-500 hover:text-red-500 transition-all"><Trash2 size={16} /></button>
+                              <button 
+                                onClick={() => {
+                                  if (confirm('Are you sure you want to decommission this asset node?')) {
+                                    onDeleteProperty(p.id);
+                                  }
+                                }}
+                                className="p-2 bg-white/5 rounded-lg text-gray-500 hover:text-red-500 transition-all"
+                              >
+                                <Trash2 size={16} />
+                              </button>
                             </div>
                           </td>
                         </tr>

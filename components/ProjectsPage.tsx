@@ -17,7 +17,14 @@ type FilterStatus = 'ALL PROJECTS' | 'ONGOING' | 'COMPLETED';
 
 export const ProjectsPage: React.FC<ProjectsPageProps> = ({ projects, onProjectClick }) => {
   const [activeFilter, setActiveFilter] = useState<FilterStatus>('ALL PROJECTS');
-  const [favorites, setFavorites] = useState<Set<string>>(new Set());
+  const [favorites, setFavorites] = useState<Set<string>>(() => {
+    try {
+      const saved = localStorage.getItem('projectFavorites');
+      return saved ? new Set(JSON.parse(saved)) : new Set();
+    } catch {
+      return new Set();
+    }
+  });
 
   const filteredProjects = useMemo(() => {
     if (activeFilter === 'ALL PROJECTS') return projects;
@@ -30,6 +37,7 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({ projects, onProjectC
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
       else next.add(id);
+      localStorage.setItem('projectFavorites', JSON.stringify(Array.from(next)));
       return next;
     });
   };
@@ -138,13 +146,13 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({ projects, onProjectC
                     
                     {/* Status Badge */}
                     <div className="absolute top-6 left-6">
-                      <div className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest flex items-center gap-2 backdrop-blur-md border ${
+                      <div className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest flex items-center gap-2 shadow-lg ${
                         project.status === 'completed' 
-                          ? 'bg-green-500/20 text-green-400 border-green-500/30' 
-                          : 'bg-amber-500/20 text-amber-400 border-amber-500/30'
+                          ? 'bg-green-500 text-white' 
+                          : 'bg-orange-500 text-white'
                       }`}>
-                        <div className={`w-1.5 h-1.5 rounded-full ${project.status === 'completed' ? 'bg-green-400' : 'bg-amber-400 animate-pulse'}`}></div>
-                        {project.status}
+                        <div className={`w-1.5 h-1.5 rounded-full bg-white ${project.status === 'completed' ? '' : 'animate-pulse'}`}></div>
+                        {project.status === 'completed' ? 'Completed' : 'Ongoing'}
                       </div>
                     </div>
 

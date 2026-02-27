@@ -123,6 +123,36 @@ export const AddListingPage: React.FC<AddListingPageProps> = ({ userRole, onAddP
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+
+  const handleDragStart = (e: React.DragEvent, index: number) => {
+    setDraggedIndex(index);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  };
+
+  const handleDrop = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    if (draggedIndex === null || draggedIndex === index) return;
+
+    setFormData(prev => {
+      const newImages = [...prev.images];
+      const draggedImage = newImages[draggedIndex];
+      newImages.splice(draggedIndex, 1);
+      newImages.splice(index, 0, draggedImage);
+      return { ...prev, images: newImages };
+    });
+    setDraggedIndex(null);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedIndex(null);
+  };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
@@ -151,8 +181,12 @@ export const AddListingPage: React.FC<AddListingPageProps> = ({ userRole, onAddP
         .filter(([_, checked]) => checked)
         .map(([key]) => key);
 
-      const localProperty: Property = {
-        id: Date.now().toString(),
+      // Final validation before submit
+      if (!formData.title) throw new Error("MANDATORY FIELD: Title is required");
+      if (formData.images.length === 0) throw new Error("MANDATORY FIELD: Property Media is required");
+      if (!formData.address) throw new Error("MANDATORY FIELD: Property Address is required");
+
+      const payload = {
         title: formData.title,
         location: formData.address || formData.city || 'Location',
         price: parseFloat(formData.price) || 0,
@@ -160,16 +194,8 @@ export const AddListingPage: React.FC<AddListingPageProps> = ({ userRole, onAddP
         description: formData.description,
         beds: parseInt(formData.bedrooms) || 0, 
         baths: parseInt(formData.bathrooms) || 0, 
-        guests: (parseInt(formData.bedrooms) || 0) * 2, 
-        bedrooms: parseInt(formData.bedrooms) || 0,
         size: parseInt(formData.size) || 0,
-        yearBuilt: parseInt(formData.yearBuilt) || new Date().getFullYear(),
         images: formData.images.length > 0 ? formData.images : ['https://picsum.photos/1200/800'],
-        status: formData.propertyStatus.toLowerCase(),
-        isGuestFavorite: false,
-        isFeatured: false,
-        rating: 5.0,
-        reviewsCount: 0,
         host: { name: 'SMW Admin', avatar: 'https://i.pravatar.cc/150?u=admin', status: 'Verified', yearsHosting: 1 },
         address: { 
           street: formData.address, city: formData.city, state: formData.county, 
@@ -181,9 +207,36 @@ export const AddListingPage: React.FC<AddListingPageProps> = ({ userRole, onAddP
           utilities: selectedAmenities.filter(a => ['centralAir', 'electricity', 'heating', 'naturalGas', 'ventilation', 'water'].includes(a)), 
           other: selectedAmenities.filter(a => ['chairAccessible', 'elevator', 'fireplace', 'smokeDetectors', 'washerDryer', 'wifi'].includes(a)) 
         },
+        is_featured: false,
+        rating: 5.0,
+        reviews_count: 0,
+        status: formData.propertyStatus.toLowerCase()
       };
 
-      if (onAddProperty) onAddProperty(localProperty);
+      const response = await fetch('/api/properties', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const contentType = response.headers.get("content-type");
+      let data;
+      if (contentType && contentType.includes("application/json")) {
+        data = await response.json();
+      } else {
+        const text = await response.text();
+        throw new Error(`Server returned non-JSON response (${response.status}): ${text.slice(0, 100)}...`);
+      }
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to submit property');
+      }
+
+      const newProperty = data;
+
+      if (onAddProperty) onAddProperty(newProperty);
       
       alert(`Property submitted successfully!`);
       setCurrentStep(1);
@@ -214,12 +267,12 @@ export const AddListingPage: React.FC<AddListingPageProps> = ({ userRole, onAddP
 
   const Input = ({ label, value, field, placeholder = '', type = 'text' }: any) => (
     <div className="space-y-2">
-      <label className="text-xs font-bold text-gray-700">{label}</label>
+      <label className="text-xs font-bold text-gray-700 dark:text-gray-300">{label}</label>
       <input 
         type={type} 
         value={value} 
         onChange={e => setFormData({...formData, [field]: e.target.value})} 
-        className="w-full bg-gray-100 border border-gray-200 rounded-md p-3 text-gray-800 outline-none focus:border-blue-500 transition-all text-sm" 
+        className="w-full bg-gray-100 dark:bg-[#111421] border border-gray-200 dark:border-white/10 rounded-md p-3 text-gray-800 dark:text-white outline-none focus:border-blue-500 dark:focus:border-[#8DC63F] transition-all text-sm placeholder-gray-400 dark:placeholder-gray-600" 
         placeholder={placeholder} 
       />
     </div>
@@ -227,16 +280,16 @@ export const AddListingPage: React.FC<AddListingPageProps> = ({ userRole, onAddP
 
   const Select = ({ label, value, field, options }: any) => (
     <div className="space-y-2">
-      <label className="text-xs font-bold text-gray-700">{label}</label>
+      <label className="text-xs font-bold text-gray-700 dark:text-gray-300">{label}</label>
       <div className="relative">
         <select 
           value={value} 
           onChange={e => setFormData({...formData, [field]: e.target.value})} 
-          className="w-full bg-gray-100 border border-gray-200 rounded-md p-3 text-gray-800 outline-none focus:border-blue-500 transition-all text-sm appearance-none cursor-pointer"
+          className="w-full bg-gray-100 dark:bg-[#111421] border border-gray-200 dark:border-white/10 rounded-md p-3 text-gray-800 dark:text-white outline-none focus:border-blue-500 dark:focus:border-[#8DC63F] transition-all text-sm appearance-none cursor-pointer"
         >
           {options.map((opt: string) => <option key={opt} value={opt}>{opt}</option>)}
         </select>
-        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
+        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 pointer-events-none" size={16} />
       </div>
     </div>
   );
@@ -247,23 +300,23 @@ export const AddListingPage: React.FC<AddListingPageProps> = ({ userRole, onAddP
         type="checkbox"
         checked={formData.amenities[field]}
         onChange={() => setFormData({...formData, amenities: {...formData.amenities, [field]: !formData.amenities[field]}})}
-        className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+        className="w-4 h-4 rounded border-gray-300 dark:border-white/20 text-blue-600 dark:text-[#8DC63F] focus:ring-blue-500 dark:focus:ring-[#8DC63F] bg-white dark:bg-[#111421]"
       />
-      <span className="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">{label}</span>
+      <span className="text-sm text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">{label}</span>
     </label>
   );
 
   return (
-    <div className="pt-24 pb-24 bg-gray-50 min-h-screen font-sans">
+    <div className="pt-24 pb-24 bg-gray-50 dark:bg-[#06080f] min-h-screen font-sans transition-colors duration-500">
       <div className="max-w-5xl mx-auto px-4">
         
         {/* Step Navigation */}
-        <div className="flex bg-gray-100 rounded-t-lg overflow-hidden border-b border-gray-200">
+        <div className="flex bg-gray-100 dark:bg-[#111421] rounded-t-lg overflow-hidden border-b border-gray-200 dark:border-white/10">
           {STEPS.map((s) => (
             <div 
               key={s.id}
               className={`flex-1 flex items-center justify-center py-4 px-2 transition-all relative ${
-                currentStep === s.id ? 'bg-white text-blue-600' : 'text-gray-500'
+                currentStep === s.id ? 'bg-white dark:bg-[#1a1d2d] text-blue-600 dark:text-[#8DC63F]' : 'text-gray-500 dark:text-gray-400'
               }`}
             >
               <span className="text-xs font-bold">{s.id}. {s.label}</span>
@@ -271,15 +324,15 @@ export const AddListingPage: React.FC<AddListingPageProps> = ({ userRole, onAddP
           ))}
         </div>
 
-        <div className="bg-white p-8 border-x border-b border-gray-200 shadow-sm space-y-8">
+        <div className="bg-white dark:bg-[#111421] p-8 border-x border-b border-gray-200 dark:border-white/10 shadow-sm space-y-8">
           
           {/* Mandatory Banner */}
-          <div className="bg-[#FF7043] p-4 rounded-md flex items-center gap-4">
+          <div className="bg-[#FF7043] dark:bg-[#FF7043]/80 p-4 rounded-md flex items-center gap-4">
              <p className="text-xs font-bold text-white">These fields are mandatory: Title, Property Media, Property Address</p>
           </div>
 
           {error && (
-            <div className="p-4 bg-red-50 border border-red-100 rounded-md flex items-center gap-3 text-red-600 text-xs font-bold">
+            <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800/30 rounded-md flex items-center gap-3 text-red-600 dark:text-red-400 text-xs font-bold">
               <AlertTriangle size={16} /> {error}
             </div>
           )}
@@ -365,11 +418,33 @@ export const AddListingPage: React.FC<AddListingPageProps> = ({ userRole, onAddP
                 {formData.images.length > 0 && (
                   <div className="grid grid-cols-5 gap-4">
                     {formData.images.map((img, i) => (
-                      <div key={i} className="relative aspect-square rounded-lg overflow-hidden border border-gray-200">
-                        <img src={img} className="w-full h-full object-cover" />
+                      <div 
+                        key={i} 
+                        draggable
+                        onDragStart={(e) => handleDragStart(e, i)}
+                        onDragOver={(e) => handleDragOver(e, i)}
+                        onDrop={(e) => handleDrop(e, i)}
+                        onDragEnd={handleDragEnd}
+                        onDoubleClick={() => {
+                          setFormData(prev => {
+                            const newImages = [...prev.images];
+                            const featuredImage = newImages[i];
+                            newImages.splice(i, 1);
+                            newImages.unshift(featuredImage);
+                            return { ...prev, images: newImages };
+                          });
+                        }}
+                        className={`relative aspect-square rounded-lg overflow-hidden border-2 cursor-move transition-all ${draggedIndex === i ? 'opacity-50 border-blue-500' : 'border-gray-200 hover:border-blue-300'}`}
+                      >
+                        <img src={img} className="w-full h-full object-cover pointer-events-none" />
+                        {i === 0 && (
+                          <div className="absolute bottom-0 left-0 right-0 bg-blue-500/80 text-white text-[10px] font-bold text-center py-1">
+                            FEATURED
+                          </div>
+                        )}
                         <button 
                           onClick={() => setFormData(prev => ({...prev, images: prev.images.filter((_, idx) => idx !== i)}))}
-                          className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full"
+                          className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full hover:bg-red-600 transition-colors z-10"
                         >
                           <X size={10} />
                         </button>

@@ -26,6 +26,7 @@ export const SingleProjectPage: React.FC<SingleProjectPageProps> = ({ project })
     { label: 'Project Value', value: project.value || 'N/A', icon: DollarSign },
     { label: 'Timeline', value: project.timeline || 'N/A', icon: Clock },
     { label: 'Lead Architect', value: project.architect || 'SMW Uganda', icon: DraftingCompass },
+    { label: 'Project Manager', value: project.projectManager || 'N/A', icon: User },
   ];
 
   return (
@@ -57,8 +58,12 @@ export const SingleProjectPage: React.FC<SingleProjectPageProps> = ({ project })
                   <Building2 size={14} className="text-[#8DC63F]" />
                   {project.category}
                 </div>
-                <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#8DC63F]/10 border border-[#8DC63F]/20 text-[10px] font-black uppercase tracking-widest text-[#8DC63F]">
-                  <div className={`w-1.5 h-1.5 rounded-full ${project.status === 'completed' ? 'bg-[#8DC63F]' : 'bg-amber-400 animate-pulse'}`}></div>
+                <div className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest ${
+                  project.status === 'completed'
+                    ? 'bg-green-500/10 border border-green-500/20 text-green-400'
+                    : 'bg-orange-500/10 border border-orange-500/20 text-orange-400'
+                }`}>
+                  <div className={`w-1.5 h-1.5 rounded-full ${project.status === 'completed' ? 'bg-green-500' : 'bg-orange-500 animate-pulse'}`}></div>
                   {project.status}
                 </div>
               </div>

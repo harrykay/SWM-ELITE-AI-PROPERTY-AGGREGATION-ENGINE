@@ -98,7 +98,10 @@ export const Hero: React.FC<HeroProps> = ({ currency }) => {
             <FilterOption label="Spec Hierarchy" options={['Beds | Baths', '1 | 1', '2 | 2', '3+ | 3+']} />
             <FilterOption label={`Asset Valuation (${currency})`} options={priceOptions} />
           </div>
-          <button className="w-full lg:w-auto bg-gray-900 text-white px-8 md:px-12 py-4 md:py-5 rounded-xl md:rounded-2xl font-black uppercase text-[10px] md:text-[11px] tracking-[0.2em] md:tracking-[0.3em] flex items-center justify-center gap-3 md:gap-4 hover:bg-[#8DC63F] hover:text-black transition-all shadow-xl shadow-gray-200">
+          <button 
+            onClick={() => window.location.href = '/properties'}
+            className="w-full lg:w-auto bg-gray-900 text-white px-8 md:px-12 py-4 md:py-5 rounded-xl md:rounded-2xl font-black uppercase text-[10px] md:text-[11px] tracking-[0.2em] md:tracking-[0.3em] flex items-center justify-center gap-3 md:gap-4 hover:bg-[#8DC63F] hover:text-black transition-all shadow-xl shadow-gray-200"
+          >
             <Search size={18} /> Search Assets
           </button>
         </div>

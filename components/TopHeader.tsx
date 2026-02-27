@@ -54,7 +54,7 @@ export const TopHeader: React.FC<TopHeaderProps> = ({ onNavigate, isAuthenticate
                   className="flex items-center gap-2 text-[10px] font-black uppercase text-gray-500 hover:text-red-500 transition-colors"
                 >
                   <LogOut size={14} />
-                  Terminate Session
+                  Logout
                 </button>
                 <div className="flex items-center gap-3 bg-black/40 px-5 py-2 rounded-2xl border border-white/10 shadow-2xl">
                   <div className="w-8 h-8 rounded-full bg-[#8DC63F]/10 flex items-center justify-center text-[#8DC63F] border border-[#8DC63F]/20">

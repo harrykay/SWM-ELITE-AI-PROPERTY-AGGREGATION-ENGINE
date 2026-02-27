@@ -20,16 +20,22 @@ import { PropertiesPage } from './components/PropertiesPage';
 import { ServicesPage } from './components/ServicesPage';
 import { AboutPage } from './components/AboutPage';
 import { AddListingPage } from './components/AddListingPage';
+import { AddProjectPage } from './components/AddProjectPage';
 import { SinglePropertyPage } from './components/SinglePropertyPage';
 import { SingleProjectPage } from './components/SingleProjectPage';
 import { ContactPage } from './components/ContactPage';
+import { LandProcessingPage } from './components/LandProcessingPage';
+import { DesignPage } from './components/DesignPage';
 import { DashboardHub } from './components/DashboardHub';
 import { ManageDashboard } from './components/ManageDashboard';
 import { ComparisonModal } from './components/ComparisonModal';
+import { BlogPage } from './components/BlogPage';
+import { SingleBlogPage } from './components/SingleBlogPage';
 import { VoiceAssistant } from './components/VoiceAssistant';
 import { LoginPage } from './components/LoginPage';
 import { ProjectsPage } from './components/ProjectsPage';
 import { PropertyFeed } from './components/PropertyFeed';
+import { LatestProjects } from './components/LatestProjects';
 import { DynamicPage } from './components/DynamicPage';
 import { Repeat, AlertTriangle, RefreshCw } from 'lucide-react';
 
@@ -116,11 +122,23 @@ export interface FinancialRecord {
   description: string;
 }
 
+export interface BlogPost {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  content: string;
+  image: string;
+  author: string;
+  tags: string[];
+  publishedAt: string;
+}
+
 export interface Project {
   id: string; title: string; location: string; status: 'ongoing' | 'completed'; image: string;
   gallery?: string[]; category: string; client?: string; surfaceArea?: string;
   value?: string; architect?: string; timeline?: string; description?: string;
-  requirements?: string[];
+  requirements?: string[]; projectManager?: string;
 }
 
 // Fix: Updated Property interface with missing fields used across pages
@@ -260,18 +278,65 @@ const INITIAL_PROJECTS: Project[] = [
 ];
 
 const App: React.FC = () => {
-  const [currentPage, setCurrentPage] = useState<'home' | 'properties' | 'projects' | 'services' | 'dashboard' | 'about' | 'contact' | 'login' | 'manage-content' | 'single-project' | 'single-property' | 'add-listing' | 'dynamic'>('home');
+  const [currentPage, setCurrentPage] = useState<'home' | 'properties' | 'projects' | 'services' | 'dashboard' | 'about' | 'contact' | 'login' | 'manage-content' | 'single-project' | 'single-property' | 'add-listing' | 'add-project' | 'dynamic' | 'land-processing' | 'design' | 'blog' | 'single-blog'>('home');
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(null);
+  const [selectedBlogSlug, setSelectedBlogSlug] = useState<string | null>(null);
   const [selectedPageId, setSelectedPageId] = useState<number | null>(null);
   const [properties, setProperties] = useState<Property[]>(INITIAL_PROPERTIES);
   const [projects, setProjects] = useState<Project[]>(INITIAL_PROJECTS);
+  const [blogs, setBlogs] = useState<BlogPost[]>([]);
   const [settings, setSettings] = useState<AppSettings>(INITIAL_SETTINGS);
+  const [user, setUser] = useState<any>(null);
   const [auth, setAuth] = useState<{ user: UserProfile } | null>(null);
   const [currency, setCurrency] = useState<Currency>('UGX');
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [cmsSettings, setCmsSettings] = useState<any>({});
   const [cmsPages, setCmsPages] = useState<any[]>([]);
+
+  const handleLogin = (loggedInUser: any) => {
+    setUser(loggedInUser);
+    handleNavigate('dashboard');
+  };
+
+  const handleLogout = async () => {
+    await fetch('/api/logout', { method: 'POST' });
+    setUser(null);
+    handleNavigate('home');
+  };
+
+  useEffect(() => {
+    const checkUser = async () => {
+      try {
+        const res = await fetch('/api/me');
+        if (res.ok) {
+          const data = await res.json();
+          setUser(data);
+        }
+      } catch (err) {
+        console.error('Not authenticated');
+      }
+    };
+    checkUser();
+  }, []);
+
+  useEffect(() => {
+    if (user) {
+      setAuth({ user: { id: String(user.id), name: user.email, email: user.email, role: user.role, isVerified: true } });
+    } else {
+      setAuth(null);
+    }
+  }, [user]);
+
+  const handleNavigate = useCallback((page: string, params?: any) => {
+    const p = page.toLowerCase().trim().replace(/\s+/g, '-');
+    if (p === 'single-project') { setSelectedProjectId(params?.id); setCurrentPage('single-project'); }
+    else if (p === 'single-property') { setSelectedPropertyId(params?.id); setCurrentPage('single-property'); }
+    else if (p === 'single-blog') { setSelectedBlogSlug(params?.slug); setCurrentPage('single-blog'); }
+    else if (p === 'dynamic') { setSelectedPageId(params?.id); setCurrentPage('dynamic'); }
+    else { setCurrentPage(p as any); }
+    window.scrollTo(0, 0);
+  }, []);
 
   useEffect(() => {
     const fetchCmsData = async () => {
@@ -303,22 +368,61 @@ const App: React.FC = () => {
         console.error('FETCH_PROPERTIES_ERROR:', err);
       }
     };
+    
+    const fetchProjects = async () => {
+      try {
+        const response = await fetch('/api/projects');
+        if (response.ok) {
+          const data = await response.json();
+          if (data && data.length > 0) {
+            setProjects(data);
+          }
+        }
+      } catch (err) {
+        console.error('FETCH_PROJECTS_ERROR:', err);
+      }
+    };
+
+    const fetchBlogs = async () => {
+      try {
+        const response = await fetch('/api/blogs');
+        if (response.ok) {
+          const data = await response.json();
+          if (data && data.length > 0) {
+            setBlogs(data);
+          }
+        }
+      } catch (err) {
+        console.error('FETCH_BLOGS_ERROR:', err);
+      }
+    };
+
     fetchProperties();
+    fetchProjects();
+    fetchBlogs();
   }, []);
 
-  const handleNavigate = useCallback((page: string, params?: any) => {
-    const p = page.toLowerCase().trim().replace(/\s+/g, '-');
-    if (p === 'single-project') { setSelectedProjectId(params?.id); setCurrentPage('single-project'); }
-    else if (p === 'single-property') { setSelectedPropertyId(params?.id); setCurrentPage('single-property'); }
-    else if (p === 'dynamic') { setSelectedPageId(params?.id); setCurrentPage('dynamic'); }
-    else { setCurrentPage(p as any); }
-    window.scrollTo(0, 0);
-  }, []);
-
-  const handleLogin = (u: any) => {
-    setAuth({ user: { id: u.id || '1', name: u.name || 'User', email: u.email || 'user@smw.co.ug', role: u.role || 'buyer', isVerified: true } });
-    handleNavigate('dashboard');
+  const handleDeleteProperty = async (id: string) => {
+    try {
+      const res = await fetch(`/api/properties/${id}`, { method: 'DELETE' });
+      if (res.ok) setProperties(prev => prev.filter(p => p.id !== id));
+    } catch (err) {
+      console.error('DELETE_PROPERTY_ERROR:', err);
+    }
   };
+
+  const handleDeleteProject = async (id: string) => {
+    try {
+      const res = await fetch(`/api/projects/${id}`, { method: 'DELETE' });
+      if (res.ok) setProjects(prev => prev.filter(p => p.id !== id));
+    } catch (err) {
+      console.error('DELETE_PROJECT_ERROR:', err);
+    }
+  };
+
+  if (!auth) {
+    return <LoginPage onLogin={handleLogin} />;
+  }
 
   const isDashboard = ['dashboard', 'manage-content', 'add-listing'].includes(currentPage);
 
@@ -350,6 +454,13 @@ const App: React.FC = () => {
               {cmsSettings.showWhoWeAre !== false && <WhoWeAre />}
               <PartnerLogos />
               {cmsSettings.showFeatured !== false && <FeaturedProperties currency={currency} />}
+              {cmsSettings.showLatestProjects !== false && (
+                <LatestProjects 
+                  projects={projects} 
+                  onProjectClick={(id) => handleNavigate('single-project', { id })} 
+                  onViewAll={() => handleNavigate('projects')}
+                />
+              )}
               <PropertyFeed currency={currency} onPropertyClick={(id) => handleNavigate('single-property', { id })} />
               {cmsSettings.showTestimonials !== false && <Testimonials />}
               {cmsSettings.showFAQ !== false && <FAQ />}
@@ -359,6 +470,7 @@ const App: React.FC = () => {
           {currentPage === 'login' && <LoginPage onLogin={handleLogin} />}
           {currentPage === 'properties' && <PropertiesPage properties={properties} onPropertyClick={(id) => handleNavigate('single-property', { id })} currency={currency} />}
           {currentPage === 'projects' && <ProjectsPage projects={projects} onProjectClick={(id) => handleNavigate('single-project', { id })} />}
+          {currentPage === 'blog' && <BlogPage blogs={blogs} onBlogClick={(slug) => handleNavigate('single-blog', { slug })} />}
           {currentPage === 'about' && (
             <AboutPage content={{
               whoWeAre: "SMW Construction Developers is a premier real estate and construction firm based in Uganda.",
@@ -374,11 +486,18 @@ const App: React.FC = () => {
               { id: '2', title: 'Design', description: 'Architectural design and planning.', details: ['3D Modeling', 'Blueprints'] }
             ]} />
           )}
-          {currentPage === 'add-listing' && auth?.user && (
+          {currentPage === 'land-processing' && <LandProcessingPage />}
+          {currentPage === 'design' && <DesignPage />}
+          {currentPage === 'add-listing' && (
             <AddListingPage 
-              userRole={auth.user.role} 
+              userRole={auth?.user?.role || 'agent'} 
               currency={currency} 
               onAddProperty={(p) => setProperties(prev => [p, ...prev])} 
+            />
+          )}
+          {currentPage === 'add-project' && (
+            <AddProjectPage 
+              onAddProject={(p) => setProjects(prev => [p, ...prev])} 
             />
           )}
           {currentPage === 'dashboard' && auth?.user && (
@@ -391,11 +510,28 @@ const App: React.FC = () => {
             <ManageDashboard 
               settings={settings} onUpdateSettings={setSettings}
               properties={properties} onUpdateProperty={(p) => setProperties(prev => prev.map(item => item.id === p.id ? p : item))}
-              projects={projects} onUpdateProject={(p) => setProjects(prev => prev.map(item => item.id === p.id ? p : item))} onAddProject={(p) => setProjects(prev => [p, ...prev])}
+              onDeleteProperty={handleDeleteProperty}
+              projects={projects} onUpdateProject={(p) => setProjects(prev => prev.map(item => item.id === p.id ? p : item))} 
+              onAddProject={(p) => setProjects(prev => [p, ...prev])}
+              onDeleteProject={handleDeleteProject}
+              onNavigate={handleNavigate}
             />
           )}
-          {currentPage === 'single-project' && <SingleProjectPage project={projects.find(p => p.id === selectedProjectId) || projects[0]} />}
-          {currentPage === 'single-property' && <SinglePropertyPage property={properties.find(p => p.id === selectedPropertyId) || properties[0]} currency={currency} />}
+          {currentPage === 'single-project' && (
+            projects.length > 0 ? (
+              <SingleProjectPage project={projects.find(p => p.id === selectedProjectId) || projects[0]} />
+            ) : (
+              <div className="pt-40 text-center text-gray-500 font-black uppercase tracking-widest">Project Node Not Found</div>
+            )
+          )}
+          {currentPage === 'single-property' && (
+            properties.length > 0 ? (
+              <SinglePropertyPage property={properties.find(p => p.id === selectedPropertyId) || properties[0]} currency={currency} />
+            ) : (
+              <div className="pt-40 text-center text-gray-500 font-black uppercase tracking-widest">Asset Node Not Found</div>
+            )
+          )}
+          {currentPage === 'single-blog' && <SingleBlogPage blog={blogs.find(b => b.slug === selectedBlogSlug) || blogs[0]} onBack={() => handleNavigate('blog')} />}
           {currentPage === 'dynamic' && selectedPageId && (
             <DynamicPage page={cmsPages.find(p => p.id === selectedPageId)} />
           )}

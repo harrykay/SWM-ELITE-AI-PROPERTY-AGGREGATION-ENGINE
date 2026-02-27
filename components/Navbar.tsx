@@ -57,11 +57,29 @@ export const Navbar: React.FC<NavbarProps> = ({
   const [isServicesOpen, setIsServicesOpen] = useState(false);
   const [isPagesOpen, setIsPagesOpen] = useState(false);
 
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isMobileMenuOpen]);
+
+  const handleMobileNavigate = (page: string, params?: any) => {
+    onNavigate?.(page, params);
+    setIsMobileMenuOpen(false);
+  };
 
   return (
     <header className={`transition-all duration-500 ${scrolled ? 'py-4 bg-[#06080f]/95 backdrop-blur-xl border-b border-white/5' : 'py-8 bg-[#06080f]/50 backdrop-blur-sm'}`}>
@@ -114,7 +132,12 @@ export const Navbar: React.FC<NavbarProps> = ({
                         <button
                           key={sub}
                           onClick={() => {
-                            onNavigate?.('services');
+                            const targetPage = sub.toLowerCase().replace(/\s+/g, '-');
+                            if (['land-processing', 'design'].includes(targetPage)) {
+                              onNavigate?.(targetPage);
+                            } else {
+                              onNavigate?.('services');
+                            }
                             setIsServicesOpen(false);
                           }}
                           className="w-full text-left px-5 py-3.5 rounded-xl text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-white hover:bg-[#8DC63F]/10 transition-all border border-transparent hover:border-[#8DC63F]/20 group/sub"
@@ -132,7 +155,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             </AnimatePresence>
           </div>
 
-          {['About', 'Contact'].map((item) => (
+          {['About', 'Contact', 'Blog'].map((item) => (
             <button
               key={item}
               onClick={() => onNavigate?.(item.toLowerCase())}
@@ -192,13 +215,22 @@ export const Navbar: React.FC<NavbarProps> = ({
         <div className="flex items-center gap-3 md:gap-6">
           
           {/* Add Listing Node - Primary CTA */}
-          <button 
-            onClick={() => onNavigate?.('add-listing')}
-            className="hidden md:flex items-center gap-2 bg-[#8DC63F] text-black px-6 py-2.5 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] hover:bg-white transition-all shadow-xl shadow-[#8DC63F]/10 border border-transparent active:scale-95"
-          >
-            <Plus size={16} strokeWidth={3} />
-            Initialize Asset
-          </button>
+          <div className="hidden md:flex items-center gap-3">
+            <button 
+              onClick={() => onNavigate?.('add-listing')}
+              className="flex items-center gap-2 bg-[#8DC63F] text-black px-6 py-2.5 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] hover:bg-white transition-all shadow-xl shadow-[#8DC63F]/10 border border-transparent active:scale-95"
+            >
+              <Plus size={16} strokeWidth={3} />
+              Add Listing
+            </button>
+            <button 
+              onClick={() => onNavigate?.('add-project')}
+              className="flex items-center gap-2 bg-white/10 text-white px-6 py-2.5 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] hover:bg-white hover:text-black transition-all border border-white/20 active:scale-95"
+            >
+              <Plus size={16} strokeWidth={3} />
+              Add Project
+            </button>
+          </div>
           
           {/* Notifications */}
           <button className="relative p-2.5 text-white hover:text-[#8DC63F] transition-colors">
@@ -219,11 +251,71 @@ export const Navbar: React.FC<NavbarProps> = ({
           </button>
 
           {/* Mobile Menu Bars */}
-          <button className="text-white hover:text-[#8DC63F] transition-colors lg:hidden">
+          <button 
+            onClick={() => setIsMobileMenuOpen(true)}
+            className="text-white hover:text-[#8DC63F] transition-colors lg:hidden"
+          >
             <Menu size={32} strokeWidth={2.5} />
           </button>
         </div>
       </div>
+
+      {/* Mobile Menu Overlay */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, x: '100%' }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: '100%' }}
+            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            className="fixed inset-0 z-[200] bg-[#06080f] flex flex-col"
+          >
+            <div className="p-6 flex justify-between items-center border-b border-white/10">
+              <Logo />
+              <button 
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="p-2 text-white hover:text-[#8DC63F] transition-colors rounded-full bg-white/5"
+              >
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-6">
+              {['Home', 'Properties', 'Projects', 'Services', 'About', 'Contact'].map((item) => (
+                <button
+                  key={item}
+                  onClick={() => handleMobileNavigate(item.toLowerCase())}
+                  className={`text-2xl font-black uppercase tracking-widest text-left transition-colors ${
+                    activePage === item.toLowerCase() ? 'text-[#8DC63F]' : 'text-white'
+                  }`}
+                >
+                  {item}
+                </button>
+              ))}
+              
+              <div className="h-px bg-white/10 my-4"></div>
+              
+              <button
+                onClick={() => handleMobileNavigate('add-listing')}
+                className="bg-[#8DC63F] text-black px-6 py-4 rounded-2xl font-black text-sm uppercase tracking-[0.2em] text-center"
+              >
+                Add Listing
+              </button>
+              <button
+                onClick={() => handleMobileNavigate('add-project')}
+                className="bg-white/10 text-white border border-white/20 px-6 py-4 rounded-2xl font-black text-sm uppercase tracking-[0.2em] text-center"
+              >
+                Add Project
+              </button>
+              <button
+                onClick={() => handleMobileNavigate('login')}
+                className="border border-white/20 text-white px-6 py-4 rounded-2xl font-black text-sm uppercase tracking-[0.2em] text-center"
+              >
+                Login / Dashboard
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </header>
   );
 };

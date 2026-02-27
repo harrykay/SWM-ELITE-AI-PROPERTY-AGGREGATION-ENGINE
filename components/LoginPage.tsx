@@ -11,7 +11,7 @@ import {
 import { UserRole } from '../App';
 
 interface LoginPageProps {
-  onLogin: (user?: any) => void;
+  onLogin: (user: any) => void;
 }
 
 type AuthMode = 'login' | 'register' | 'recovery';
@@ -62,14 +62,6 @@ const REGISTRATION_ROLES: RoleOption[] = [
   },
 ];
 
-const SAMPLE_USERS = [
-  { email: 'admin@smw.co.ug', password: 'password123', role: 'admin' as const, name: 'Portfolio Lead' },
-  { email: 'seller@smw.co.ug', password: 'password123', role: 'seller' as const, name: 'Premium Developer' },
-  { email: 'buyer@smw.co.ug', password: 'password123', role: 'buyer' as const, name: 'Asset Seeker' },
-  { email: 'tenant@smw.co.ug', password: 'password123', role: 'tenant' as const, name: 'Resident Node' },
-  { email: 'investor@smw.co.ug', password: 'password123', role: 'investor' as const, name: 'Portfolio Lead' },
-];
-
 export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
   const [mode, setMode] = useState<AuthMode>('login');
   const [registerStep, setRegisterStep] = useState(1);
@@ -81,15 +73,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
-
-  const selectSampleUser = (user: typeof SAMPLE_USERS[0]) => {
-    setEmail(user.email);
-    setPassword(user.password);
-    setFullName(user.name);
-    setError(null);
-    setSuccessMsg(null);
-    setMode('login');
-  };
 
   const handleRegisterNext = () => {
     if (selectedRole) {
@@ -105,27 +88,38 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
     setError(null);
     setSuccessMsg(null);
 
-    const sample = SAMPLE_USERS.find(u => u.email === email && u.password === password);
-    if (sample && mode === 'login') {
-      setTimeout(() => {
-        setIsLoading(false);
-        onLogin(sample);
-      }, 800);
-      return;
-    }
-
-    if (true) { // Sandbox mode always active for now
-      setTimeout(() => {
-        setIsLoading(false);
-        if (mode === 'register') {
+    try {
+      if (mode === 'login') {
+        const res = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          onLogin(data);
+        } else {
+          setError(data.error || 'Login failed');
+        }
+      } else {
+        const res = await fetch('/api/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password, role: selectedRole })
+        });
+        const data = await res.json();
+        if (res.ok) {
           setMode('login');
           setRegisterStep(1);
-          setSuccessMsg("IDENTITY NODE ESTABLISHED. VERIFICATION SENT TO EMAIL NODE.");
+          setSuccessMsg('Registration successful. Please log in.');
         } else {
-          onLogin({ email, role: 'buyer', name: fullName || 'Demo User' });
+          setError(data.error || 'Registration failed');
         }
-      }, 800);
-      return;
+      }
+    } catch (err) {
+      setError('An unexpected error occurred.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -234,25 +228,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                 >
                   {isLoading ? <RefreshCw className="animate-spin" /> : 'Establish Link'}
                 </button>
-              </div>
-
-              <div className="mt-12 pt-12 border-t border-white/5">
-                <p className="text-[10px] font-black uppercase text-gray-500 tracking-[0.4em] mb-6 text-center">Sample Identity Nodes</p>
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-                  {SAMPLE_USERS.map((user) => (
-                    <button
-                      key={user.role}
-                      type="button"
-                      onClick={() => selectSampleUser(user)}
-                      className="flex flex-col items-center gap-2 p-4 rounded-2xl bg-white/5 border border-white/5 hover:border-[#8DC63F]/30 hover:bg-[#8DC63F]/5 transition-all group"
-                    >
-                      <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-gray-400 group-hover:text-[#8DC63F] transition-colors">
-                        {user.role === 'admin' ? <Shield size={18} /> : user.role === 'seller' ? <Key size={18} /> : <User size={18} />}
-                      </div>
-                      <span className="text-[9px] font-black uppercase tracking-widest text-gray-500 group-hover:text-white transition-colors">{user.role}</span>
-                    </button>
-                  ))}
-                </div>
               </div>
             </form>
           ) : (

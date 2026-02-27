@@ -22,11 +22,27 @@ export const SinglePropertyPage: React.FC<SinglePropertyPageProps> = ({ property
   const [purchaseStatus, setPurchaseStatus] = useState<'idle' | 'processing' | 'success' | 'error'>('idle');
   const [bookingStatus, setBookingStatus] = useState<'idle' | 'processing' | 'success'>('idle');
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [newReview, setNewReview] = useState({ rating: 5, comment: '' });
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
 
   useEffect(() => {
     // Mock user for sandbox mode
     setCurrentUser({ id: '1', name: 'Demo User' });
-  }, []);
+    
+    const fetchReviews = async () => {
+      try {
+        const res = await fetch(`/api/properties/${property.id}/reviews`);
+        if (res.ok) {
+          const data = await res.json();
+          setReviews(data);
+        }
+      } catch (err) {
+        console.error('Failed to fetch reviews:', err);
+      }
+    };
+    fetchReviews();
+  }, [property.id]);
 
   const handlePurchase = async () => {
     if (!currentUser) return alert("IDENTITY REQUIRED: Please login to initialize purchase protocol.");
@@ -42,6 +58,35 @@ export const SinglePropertyPage: React.FC<SinglePropertyPageProps> = ({ property
     setTimeout(() => {
       setBookingStatus('success');
     }, 1500);
+  };
+
+  const submitReview = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!currentUser) return alert("Please login to submit a review.");
+    if (!newReview.comment.trim()) return;
+
+    setIsSubmittingReview(true);
+    try {
+      const res = await fetch(`/api/properties/${property.id}/reviews`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userName: currentUser.name,
+          rating: newReview.rating,
+          comment: newReview.comment
+        })
+      });
+
+      if (res.ok) {
+        const addedReview = await res.json();
+        setReviews([addedReview, ...reviews]);
+        setNewReview({ rating: 5, comment: '' });
+      }
+    } catch (err) {
+      console.error('Failed to submit review:', err);
+    } finally {
+      setIsSubmittingReview(false);
+    }
   };
 
   const formatCost = (usd: number) => formatPrice(usd, currency);
@@ -77,6 +122,93 @@ export const SinglePropertyPage: React.FC<SinglePropertyPageProps> = ({ property
             <div className="space-y-6">
               <h3 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter flex items-center gap-3"><Info size={24} className="text-[#8DC63F]" /> Infrastructure Intelligence</h3>
               <p className="text-gray-500 dark:text-gray-400 leading-relaxed text-lg font-medium">{property.description || 'Verified architectural node with premium specifications.'}</p>
+            </div>
+
+            {/* Reviews Section */}
+            <div className="space-y-8 pt-12 border-t border-gray-100 dark:border-white/5">
+              <div className="flex items-center justify-between">
+                <h3 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter flex items-center gap-3">
+                  <Star size={24} className="text-[#8DC63F]" /> Property Reviews
+                </h3>
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl font-black text-gray-900 dark:text-white">{property.rating || 0}</span>
+                  <div className="flex text-[#8DC63F]">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} size={16} fill={i < Math.round(property.rating || 0) ? "currentColor" : "none"} />
+                    ))}
+                  </div>
+                  <span className="text-sm text-gray-500">({reviews.length} reviews)</span>
+                </div>
+              </div>
+
+              {/* Review Form */}
+              <div className="bg-gray-50 dark:bg-[#111421] p-6 rounded-3xl border border-gray-100 dark:border-white/5">
+                <h4 className="text-sm font-black uppercase tracking-widest text-gray-900 dark:text-white mb-4">Leave a Review</h4>
+                <form onSubmit={submitReview} className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 mb-2">Rating</label>
+                    <div className="flex gap-2">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <button
+                          key={star}
+                          type="button"
+                          onClick={() => setNewReview({ ...newReview, rating: star })}
+                          className="text-[#8DC63F] hover:scale-110 transition-transform"
+                        >
+                          <Star size={24} fill={star <= newReview.rating ? "currentColor" : "none"} />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 mb-2">Comment</label>
+                    <textarea
+                      value={newReview.comment}
+                      onChange={(e) => setNewReview({ ...newReview, comment: e.target.value })}
+                      className="w-full bg-white dark:bg-[#161925] border border-gray-200 dark:border-white/10 rounded-xl p-4 text-gray-900 dark:text-white outline-none focus:border-[#8DC63F] transition-colors min-h-[100px]"
+                      placeholder="Share your experience with this property..."
+                      required
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={isSubmittingReview || !newReview.comment.trim()}
+                    className="bg-[#8DC63F] text-black px-8 py-3 rounded-xl font-black uppercase tracking-widest text-xs hover:bg-[#7ab033] transition-colors disabled:opacity-50 flex items-center gap-2"
+                  >
+                    {isSubmittingReview ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
+                    Submit Review
+                  </button>
+                </form>
+              </div>
+
+              {/* Reviews List */}
+              <div className="space-y-6">
+                {reviews.length === 0 ? (
+                  <p className="text-gray-500 dark:text-gray-400 text-center py-8">No reviews yet. Be the first to review this property!</p>
+                ) : (
+                  reviews.map((review) => (
+                    <div key={review.id} className="bg-white dark:bg-[#111421] p-6 rounded-3xl border border-gray-100 dark:border-white/5 shadow-sm">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-white/10 flex items-center justify-center text-gray-900 dark:text-white font-bold">
+                            {review.userName.charAt(0).toUpperCase()}
+                          </div>
+                          <div>
+                            <p className="text-sm font-bold text-gray-900 dark:text-white">{review.userName}</p>
+                            <p className="text-xs text-gray-500">{new Date(review.createdAt).toLocaleDateString()}</p>
+                          </div>
+                        </div>
+                        <div className="flex text-[#8DC63F]">
+                          {[...Array(5)].map((_, i) => (
+                            <Star key={i} size={14} fill={i < review.rating ? "currentColor" : "none"} />
+                          ))}
+                        </div>
+                      </div>
+                      <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">{review.comment}</p>
+                    </div>
+                  ))
+                )}
+              </div>
             </div>
             {/* ... Remaining components ... */}
           </div>
