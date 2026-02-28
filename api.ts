@@ -2,14 +2,12 @@ import express from 'express';
 import pg from 'pg';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { GoogleGenAI } from "@google/genai";
 import bcrypt from 'bcrypt';
 import session from 'express-session';
 
 dotenv.config();
 
 const { Pool } = pg;
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
 
 const app = express();
 console.log('--- API_APP_INITIALIZING ---');
@@ -241,22 +239,6 @@ const initDb = async () => {
         [adminEmail, hashedPassword, 'admin']
       );
       console.log('--- DEFAULT_ADMIN_SEEDED ---');
-    }
-
-    // Generate AI summaries for existing properties that don't have one
-    const propertiesWithoutSummary = await pool.query('SELECT id, description FROM properties WHERE ai_summary IS NULL');
-    for (const prop of propertiesWithoutSummary.rows) {
-      try {
-        const response = await ai.models.generateContent({
-          model: "gemini-3-flash-preview",
-          contents: `Summarize this real estate property in Uganda in exactly one engaging sentence (max 15 words): ${prop.description}`,
-          config: { temperature: 0.7 }
-        });
-        const summary = response.text?.trim() || prop.description.substring(0, 100) + '...';
-        await pool.query('UPDATE properties SET ai_summary = $1 WHERE id = $2', [summary, prop.id]);
-      } catch (err) {
-        console.error(`Failed to generate summary for property ${prop.id}`, err);
-      }
     }
 
     console.log('--- DATABASE_TABLES_VERIFIED ---');
@@ -552,19 +534,9 @@ app.get('/api/properties/latest', async (req, res) => {
     const result = await pool.query('SELECT * FROM properties ORDER BY created_at DESC LIMIT 6');
     const properties = result.rows;
 
-    // Enhance with AI summaries
-    const enhancedProperties = await Promise.all(properties.map(async (prop) => {
-      try {
-        const response = await ai.models.generateContent({
-          model: "gemini-3-flash-preview",
-          contents: `Summarize this real estate property in Uganda in exactly one engaging sentence (max 15 words): ${prop.description}`,
-          config: { temperature: 0.7 }
-        });
-        return { ...prop, aiSummary: response.text?.trim() || prop.description.substring(0, 100) + '...' };
-      } catch (err) {
-        return { ...prop, aiSummary: prop.description.substring(0, 100) + '...' };
-      }
-    }));
+    const enhancedProperties = properties.map((prop) => {
+      return { ...prop, aiSummary: prop.ai_summary || prop.description.substring(0, 100) + '...' };
+    });
 
     res.json(enhancedProperties);
   } catch (err) {
@@ -578,20 +550,9 @@ app.get('/api/properties', async (req, res) => {
     const result = await pool.query('SELECT * FROM properties ORDER BY created_at DESC');
     const properties = result.rows;
 
-    // Enhance with AI summaries
-    const enhancedProperties = await Promise.all(properties.map(async (prop) => {
-      try {
-        // Only generate if not already present or as a fallback
-        const response = await ai.models.generateContent({
-          model: "gemini-3-flash-preview",
-          contents: `Summarize this real estate property in Uganda in exactly one engaging sentence (max 15 words): ${prop.description}`,
-          config: { temperature: 0.7 }
-        });
-        return { ...prop, aiSummary: response.text?.trim() || prop.description.substring(0, 100) + '...' };
-      } catch (err) {
-        return { ...prop, aiSummary: prop.description.substring(0, 100) + '...' };
-      }
-    }));
+    const enhancedProperties = properties.map((prop) => {
+      return { ...prop, aiSummary: prop.ai_summary || prop.description.substring(0, 100) + '...' };
+    });
 
     res.json(enhancedProperties);
   } catch (err) {
@@ -703,14 +664,14 @@ app.post('/api/projects', requireRole(['admin', 'manager']), async (req, res) =>
 
 app.put('/api/projects/:id', requireRole(['admin', 'manager']), async (req, res) => {
   const { id } = req.params;
-  const { title, location, status, image, gallery, category, client, surfaceArea, value, architect, timeline, description, requirements } = req.body;
+  const { title, location, status, image, gallery, category, client, surfaceArea, value, architect, timeline, description, requirements, projectManager } = req.body;
   
   try {
     const result = await pool.query(
       `UPDATE projects 
-      SET title = $1, location = $2, status = $3, image = $4, gallery = $5, category = $6, client = $7, surface_area = $8, value = $9, architect = $10, timeline = $11, description = $12, requirements = $13
-      WHERE id = $14 RETURNING *`,
-      [title, location, status, image, gallery || [], category, client, surfaceArea, value, architect, timeline, description, requirements || [], id]
+      SET title = $1, location = $2, status = $3, image = $4, gallery = $5, category = $6, client = $7, surface_area = $8, value = $9, architect = $10, timeline = $11, description = $12, requirements = $13, project_manager = $14
+      WHERE id = $15 RETURNING *`,
+      [title, location, status, image, gallery || [], category, client, surfaceArea, value, architect, timeline, description, requirements || [], projectManager, id]
     );
     
     if (result.rows.length === 0) {
@@ -721,6 +682,7 @@ app.put('/api/projects/:id', requireRole(['admin', 'manager']), async (req, res)
     res.json({
       ...row,
       surfaceArea: row.surface_area,
+      projectManager: row.project_manager,
       id: row.id.toString()
     });
   } catch (err) {

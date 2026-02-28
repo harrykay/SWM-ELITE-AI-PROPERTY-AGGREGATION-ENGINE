@@ -4,7 +4,8 @@ import {
   LayoutDashboard, Building, BarChart3, Users, 
   Box, Activity, Wallet, Clock, History, Edit3, 
   TrendingUp, ArrowUpRight, ArrowDownRight, Wrench, 
-  MessageSquare, ShieldCheck, User, AlertTriangle
+  MessageSquare, ShieldCheck, User, AlertTriangle, LogOut,
+  Sun, Cloud, CloudRain, ChevronDown, ChevronUp
 } from 'lucide-react';
 import { UserRole, Property, Currency, formatPrice } from '../App';
 
@@ -19,10 +20,92 @@ interface DashboardHubProps {
   properties: Property[];
   currency: Currency;
   onManageContent?: () => void;
+  onLogout?: () => void;
 }
 
+const WeatherWidget = () => {
+  return (
+    <div className="bg-[#0d111a] border border-white/5 rounded-[2.5rem] p-10">
+      <h3 className="text-xl font-black text-white uppercase tracking-tighter mb-6">Weather Node</h3>
+      <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center gap-4">
+          <Sun size={48} className="text-yellow-500" />
+          <div>
+            <h4 className="text-4xl font-black text-white">28°C</h4>
+            <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Kampala, UG</p>
+          </div>
+        </div>
+        <div className="text-right">
+          <p className="text-sm font-bold text-gray-300">Sunny</p>
+          <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Humidity: 45%</p>
+        </div>
+      </div>
+      
+      <div className="border-t border-white/5 pt-6">
+        <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-4">7-Day Forecast</h4>
+        <div className="flex justify-between gap-2 overflow-x-auto pb-2 custom-scrollbar">
+          {[
+            { day: 'Mon', temp: '28°', icon: Sun, color: 'text-yellow-500' },
+            { day: 'Tue', temp: '27°', icon: Cloud, color: 'text-gray-400' },
+            { day: 'Wed', temp: '26°', icon: CloudRain, color: 'text-blue-400' },
+            { day: 'Thu', temp: '25°', icon: CloudRain, color: 'text-blue-400' },
+            { day: 'Fri', temp: '28°', icon: Sun, color: 'text-yellow-500' },
+            { day: 'Sat', temp: '29°', icon: Sun, color: 'text-yellow-500' },
+            { day: 'Sun', temp: '27°', icon: Cloud, color: 'text-gray-400' },
+          ].map((f, i) => (
+            <div key={i} className="flex flex-col items-center gap-2 min-w-[40px]">
+              <span className="text-[9px] font-black text-gray-500 uppercase">{f.day}</span>
+              <f.icon size={16} className={f.color} />
+              <span className="text-xs font-bold text-white">{f.temp}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const NewsCard = () => {
+  const [expanded, setExpanded] = useState(false);
+  
+  return (
+    <div 
+      className="bg-[#0d111a] border border-white/5 rounded-[2.5rem] p-10 cursor-pointer hover:border-[#8DC63F]/30 transition-all"
+      onClick={() => setExpanded(!expanded)}
+    >
+      <div className="flex justify-between items-start mb-4">
+        <h3 className="text-xl font-black text-white uppercase tracking-tighter">Market Intel</h3>
+        <button className="text-gray-500 hover:text-white transition-colors">
+          {expanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+        </button>
+      </div>
+      
+      <div className="space-y-4">
+        <div className="flex items-center gap-3">
+          <span className="px-2 py-1 bg-[#8DC63F]/10 text-[#8DC63F] text-[9px] font-black uppercase tracking-widest rounded">Real Estate</span>
+          <span className="text-[9px] font-black text-gray-500 uppercase tracking-widest">2 hours ago</span>
+        </div>
+        <h4 className="text-lg font-bold text-gray-200 leading-tight">
+          Kampala Luxury Property Values Surge by 12% in Q3
+        </h4>
+        
+        {expanded && (
+          <div className="pt-4 border-t border-white/5 mt-4 text-sm text-gray-400 font-medium leading-relaxed animate-in fade-in slide-in-from-top-2">
+            <p className="mb-3">
+              Recent data shows a significant uptick in luxury property valuations across prime Kampala neighborhoods, including Kololo, Nakasero, and Naguru.
+            </p>
+            <p>
+              Experts attribute this growth to increased diaspora investment and the completion of key infrastructure projects improving accessibility to these premium zones. The trend is expected to continue into the next quarter.
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
 export const DashboardHub: React.FC<DashboardHubProps> = ({ 
-  userRole, currency, properties, onManageContent 
+  userRole, currency, properties, onManageContent, onLogout 
 }) => {
   const [activeView, setActiveView] = useState('Dashboard');
 
@@ -95,6 +178,11 @@ export const DashboardHub: React.FC<DashboardHubProps> = ({
                   <button className="w-full mt-10 py-4 border border-white/5 rounded-2xl text-[10px] font-black uppercase text-gray-500 hover:text-white hover:bg-white/5 transition-all">Audit Global Ledger</button>
                </div>
             </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
+               <WeatherWidget />
+               <NewsCard />
+            </div>
           </>
         );
       case 'Tenants':
@@ -136,6 +224,15 @@ export const DashboardHub: React.FC<DashboardHubProps> = ({
               <button onClick={onManageContent} className="w-full flex items-center px-4 py-3 rounded-xl text-[#8DC63F] hover:bg-[#8DC63F]/10 transition-all">
                 <ShieldCheck size={18} />
                 <span className="ml-4 text-[10px] font-black uppercase tracking-widest">Admin Terminal</span>
+              </button>
+            </div>
+          )}
+
+          {onLogout && (
+            <div className="pt-4 mt-4 border-t border-white/5">
+              <button onClick={onLogout} className="w-full flex items-center px-4 py-3 rounded-xl text-red-500 hover:bg-red-500/10 transition-all">
+                <LogOut size={18} />
+                <span className="ml-4 text-[10px] font-black uppercase tracking-widest">Logout</span>
               </button>
             </div>
           )}

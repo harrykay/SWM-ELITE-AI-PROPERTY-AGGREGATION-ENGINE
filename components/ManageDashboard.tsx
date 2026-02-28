@@ -9,7 +9,7 @@ import {
   Settings2, Globe, Mail, CreditCard, Lock, Bell, Zap, 
   FileText, Smartphone, Cpu, Languages, Eye, Type,
   AlertCircle, ChevronRight, UserMinus, UserCheck, Key,
-  Wallet, Sun, Menu
+  Wallet, Sun, Menu, LogOut
 } from 'lucide-react';
 import { Property, Project, AppSettings, UserRole } from '../App';
 
@@ -24,12 +24,13 @@ interface ManageDashboardProps {
   onAddProject: (p: Project) => void;
   onDeleteProject: (id: string) => void;
   onNavigate: (page: string) => void;
+  onLogout?: () => void;
 }
 
 type MainTab = 'properties' | 'projects' | 'users' | 'finance' | 'subscriptions' | 'settings' | 'cms';
 
 export const ManageDashboard: React.FC<ManageDashboardProps> = ({ 
-  settings, onUpdateSettings, properties, onUpdateProperty, onDeleteProperty, projects, onUpdateProject, onAddProject, onDeleteProject, onNavigate 
+  settings, onUpdateSettings, properties, onUpdateProperty, onDeleteProperty, projects, onUpdateProject, onAddProject, onDeleteProject, onNavigate, onLogout 
 }) => {
   const [activeTab, setActiveTab] = useState<MainTab>('settings');
   const [subTab, setSubTab] = useState('general');
@@ -89,6 +90,17 @@ export const ManageDashboard: React.FC<ManageDashboardProps> = ({
           <SidebarItem id="cms" label="CMS" icon={Globe} />
           <SidebarItem id="subscriptions" label="SAAS" icon={CreditCard} />
         </nav>
+
+        {onLogout && (
+          <div className="p-4 mt-auto border-t border-white/5">
+            <button 
+              onClick={onLogout}
+              className="w-full flex items-center gap-4 px-6 py-4 text-[11px] font-black uppercase tracking-[0.3em] transition-all rounded-2xl text-red-500 hover:bg-red-500/10"
+            >
+              <LogOut size={18} /> Logout
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Main Command Center */}

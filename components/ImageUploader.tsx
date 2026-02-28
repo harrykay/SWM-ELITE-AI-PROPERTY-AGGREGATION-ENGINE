@@ -7,7 +7,7 @@ export const ImageUploader = ({ files, onDrop, onRemoveFile }) => {
     onDrop(acceptedFiles);
   }, [onDrop]);
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop: onDropCallback, accept: 'image/*' });
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop: onDropCallback, accept: { 'image/*': [] } });
 
   return (
     <div>

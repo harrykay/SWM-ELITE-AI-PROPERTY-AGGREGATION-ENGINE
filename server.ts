@@ -11,6 +11,7 @@ async function startServer() {
   const port = 3000;
 
   // API routes
+  console.log('--- apiApp type ---', typeof apiApp, apiApp);
   app.use(apiApp);
 
   // Vite middleware for development

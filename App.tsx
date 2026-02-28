@@ -504,6 +504,7 @@ const App: React.FC = () => {
             <DashboardHub 
               userRole={auth.user.role} onRoleChange={() => {}} properties={properties} currency={currency} 
               onManageContent={() => setCurrentPage('manage-content')} 
+              onLogout={handleLogout}
             />
           )}
           {currentPage === 'manage-content' && auth?.user && (
@@ -515,6 +516,7 @@ const App: React.FC = () => {
               onAddProject={(p) => setProjects(prev => [p, ...prev])}
               onDeleteProject={handleDeleteProject}
               onNavigate={handleNavigate}
+              onLogout={handleLogout}
             />
           )}
           {currentPage === 'single-project' && (

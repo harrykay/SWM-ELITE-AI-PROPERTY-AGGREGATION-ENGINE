@@ -17,7 +17,7 @@ export const WhoWeAre: React.FC = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 className="rounded-[2.5rem] overflow-hidden shadow-2xl h-80"
               >
-                <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=600&q=80" alt="Modern House" className="w-full h-full object-cover" />
+                <img src="https://nellions.co.ug/wp-content/uploads/2020/12/realtors.jp" alt="Modern House" className="w-full h-full object-cover" />
               </motion.div>
               <motion.div 
                 initial={{ opacity: 0, y: 20 }}

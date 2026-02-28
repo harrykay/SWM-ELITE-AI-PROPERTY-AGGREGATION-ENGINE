@@ -288,7 +288,7 @@ export const AddProjectPage: React.FC<AddProjectPageProps> = ({ onAddProject }) 
               <Input label="Surface Area" field="surfaceArea" placeholder="e.g. 15,000 sq ft" formData={formData} setFormData={setFormData} />
               <Input label="Project Value" field="value" placeholder="e.g. $2.5M" formData={formData} setFormData={setFormData} />
               <Input label="Architect" field="architect" placeholder="e.g. Studio SMW" formData={formData} setFormData={setFormData} />
-              <Input label="Project Manager" field="projectManager" placeholder="e.g. John Doe" formData={formData} setFormData={setFormData} />
+              <Input label="Project Manager's Name" field="projectManager" placeholder="e.g. John Doe" formData={formData} setFormData={setFormData} />
               
               <div className="space-y-2">
                 <label className="text-xs font-bold text-gray-700 dark:text-gray-300">Project Timeline</label>
