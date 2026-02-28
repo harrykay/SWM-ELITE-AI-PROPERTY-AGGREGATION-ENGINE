@@ -27,7 +27,6 @@ const STEPS = [
 ];
 
 export const AddListingPage: React.FC<AddListingPageProps> = ({ userRole, onAddProperty, currency }) => {
-  const [currentStep, setCurrentStep] = useState<Step>(1);
   const [isVerifying, setIsVerifying] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -97,82 +96,6 @@ export const AddListingPage: React.FC<AddListingPageProps> = ({ userRole, onAddP
     }
   });
 
-  const validateStep = () => {
-    if (currentStep === 1) {
-      if (!formData.title) return "MANDATORY FIELD: Title is required";
-    }
-    if (currentStep === 2) {
-      if (formData.images.length === 0) return "MANDATORY FIELD: Property Media is required";
-    }
-    if (currentStep === 3) {
-      if (!formData.address) return "MANDATORY FIELD: Property Address is required";
-    }
-    return null;
-  };
-
-  const handleNext = () => {
-    const err = validateStep();
-    if (err) return setError(err);
-    setError(null);
-    setCurrentStep((prev) => (prev + 1) as Step);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const handlePrev = () => {
-    setCurrentStep((prev) => (prev - 1) as Step);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
-
-  const handleDragStart = (e: React.DragEvent, index: number) => {
-    setDraggedIndex(index);
-    e.dataTransfer.effectAllowed = 'move';
-  };
-
-  const handleDragOver = (e: React.DragEvent, index: number) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-  };
-
-  const handleDrop = (e: React.DragEvent, index: number) => {
-    e.preventDefault();
-    if (draggedIndex === null || draggedIndex === index) return;
-
-    setFormData(prev => {
-      const newImages = [...prev.images];
-      const draggedImage = newImages[draggedIndex];
-      newImages.splice(draggedIndex, 1);
-      newImages.splice(index, 0, draggedImage);
-      return { ...prev, images: newImages };
-    });
-    setDraggedIndex(null);
-  };
-
-  const handleDragEnd = () => {
-    setDraggedIndex(null);
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files) return;
-
-    const newImages: string[] = [];
-    (Array.from(files) as File[]).forEach(file => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        newImages.push(reader.result as string);
-        if (newImages.length === files.length) {
-          setFormData(prev => ({
-            ...prev,
-            images: [...prev.images, ...newImages].slice(0, 5) // Limit to 5 images as per screenshot
-          }));
-        }
-      };
-      reader.readAsDataURL(file);
-    });
-  };
-
   const handleFinalize = async () => {
     setIsVerifying(true);
     setError(null);
@@ -239,7 +162,6 @@ export const AddListingPage: React.FC<AddListingPageProps> = ({ userRole, onAddP
       if (onAddProperty) onAddProperty(newProperty);
       
       alert(`Property submitted successfully!`);
-      setCurrentStep(1);
       setFormData({
         title: '', description: '', price: '', afterPriceLabel: '', beforePriceLabel: '',
         secondPrice: '', afterSecondPriceLabel: '', beforeSecondPriceLabel: '',
@@ -306,66 +228,136 @@ export const AddListingPage: React.FC<AddListingPageProps> = ({ userRole, onAddP
     </label>
   );
 
+  const CollapsibleSection = ({ title, defaultOpen = true, children }: any) => {
+    const [isOpen, setIsOpen] = useState(defaultOpen);
+    return (
+      <div className="border border-gray-200 dark:border-white/10 rounded-xl overflow-hidden bg-white dark:bg-[#111421] shadow-sm">
+        <button 
+          type="button"
+          onClick={() => setIsOpen(!isOpen)}
+          className="w-full flex items-center justify-between p-6 bg-gray-50 dark:bg-[#1a1d2d] hover:bg-gray-100 dark:hover:bg-white/5 transition-colors"
+        >
+          <h3 className="text-lg font-bold text-gray-800 dark:text-white">{title}</h3>
+          <ChevronDown className={`transition-transform ${isOpen ? 'rotate-180' : ''} text-gray-500`} />
+        </button>
+        <AnimatePresence>
+          {isOpen && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="overflow-hidden"
+            >
+              <div className="p-6 border-t border-gray-200 dark:border-white/10">
+                {children}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    );
+  };
+
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+
+  const handleDragStart = (e: React.DragEvent, index: number) => {
+    setDraggedIndex(index);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  };
+
+  const handleDrop = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    if (draggedIndex === null || draggedIndex === index) return;
+
+    setFormData(prev => {
+      const newImages = [...prev.images];
+      const draggedImage = newImages[draggedIndex];
+      newImages.splice(draggedIndex, 1);
+      newImages.splice(index, 0, draggedImage);
+      return { ...prev, images: newImages };
+    });
+    setDraggedIndex(null);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedIndex(null);
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+
+    const newImages: string[] = [];
+    (Array.from(files) as File[]).forEach(file => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        newImages.push(reader.result as string);
+        if (newImages.length === files.length) {
+          setFormData(prev => ({
+            ...prev,
+            images: [...prev.images, ...newImages].slice(0, 5) // Limit to 5 images as per screenshot
+          }));
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
   return (
     <div className="pt-24 pb-24 bg-gray-50 dark:bg-[#06080f] min-h-screen font-sans transition-colors duration-500">
-      <div className="max-w-5xl mx-auto px-4">
+      <div className="max-w-4xl mx-auto px-4">
         
-        {/* Step Navigation */}
-        <div className="flex bg-gray-100 dark:bg-[#111421] rounded-t-lg overflow-hidden border-b border-gray-200 dark:border-white/10">
-          {STEPS.map((s) => (
-            <div 
-              key={s.id}
-              className={`flex-1 flex items-center justify-center py-4 px-2 transition-all relative ${
-                currentStep === s.id ? 'bg-white dark:bg-[#1a1d2d] text-blue-600 dark:text-[#8DC63F]' : 'text-gray-500 dark:text-gray-400'
-              }`}
-            >
-              <span className="text-xs font-bold">{s.id}. {s.label}</span>
-            </div>
-          ))}
+        <div className="mb-8">
+          <h1 className="text-3xl font-black text-gray-900 dark:text-white uppercase tracking-tight">Add New Listing</h1>
+          <p className="text-gray-500 dark:text-gray-400 mt-2">Fill in the details below to publish a new property.</p>
         </div>
 
-        <div className="bg-white dark:bg-[#111421] p-8 border-x border-b border-gray-200 dark:border-white/10 shadow-sm space-y-8">
+        <div className="space-y-6">
           
           {/* Mandatory Banner */}
-          <div className="bg-[#FF7043] dark:bg-[#FF7043]/80 p-4 rounded-md flex items-center gap-4">
-             <p className="text-xs font-bold text-white">These fields are mandatory: Title, Property Media, Property Address</p>
+          <div className="bg-[#FF7043] dark:bg-[#FF7043]/80 p-4 rounded-xl flex items-center gap-4 shadow-sm">
+             <AlertTriangle className="text-white" size={20} />
+             <p className="text-sm font-bold text-white">These fields are mandatory: Title, Property Media, Property Address</p>
           </div>
 
           {error && (
-            <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800/30 rounded-md flex items-center gap-3 text-red-600 dark:text-red-400 text-xs font-bold">
-              <AlertTriangle size={16} /> {error}
+            <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800/30 rounded-xl flex items-center gap-3 text-red-600 dark:text-red-400 text-sm font-bold shadow-sm">
+              <AlertTriangle size={20} /> {error}
             </div>
           )}
 
-          {/* STEP 1: DESCRIPTION */}
-          {currentStep === 1 && (
+          <CollapsibleSection title="1. Property Description" defaultOpen={true}>
             <div className="space-y-8">
               <div className="space-y-6">
-                <h3 className="text-lg font-bold text-gray-800">Property Description</h3>
                 <Input label="*Title (mandatory)" field="title" value={formData.title} />
                 <div className="space-y-2">
-                  <label className="text-xs font-bold text-gray-700">Description</label>
-                  <div className="border border-gray-200 rounded-md overflow-hidden">
-                    <div className="bg-gray-50 p-2 border-b border-gray-200 flex gap-2">
-                      <button className="p-1 hover:bg-gray-200 rounded"><Bold size={14} /></button>
-                      <button className="p-1 hover:bg-gray-200 rounded"><Italic size={14} /></button>
-                      <button className="p-1 hover:bg-gray-200 rounded"><Underline size={14} /></button>
-                      <div className="w-px h-4 bg-gray-300 mx-1" />
-                      <button className="p-1 hover:bg-gray-200 rounded"><List size={14} /></button>
-                      <button className="p-1 hover:bg-gray-200 rounded"><ListOrdered size={14} /></button>
-                      <button className="p-1 hover:bg-gray-200 rounded"><LinkIcon size={14} /></button>
+                  <label className="text-xs font-bold text-gray-700 dark:text-gray-300">Description</label>
+                  <div className="border border-gray-200 dark:border-white/10 rounded-md overflow-hidden">
+                    <div className="bg-gray-50 dark:bg-[#1a1d2d] p-2 border-b border-gray-200 dark:border-white/10 flex gap-2">
+                      <button className="p-1 hover:bg-gray-200 dark:hover:bg-white/10 rounded text-gray-600 dark:text-gray-300"><Bold size={14} /></button>
+                      <button className="p-1 hover:bg-gray-200 dark:hover:bg-white/10 rounded text-gray-600 dark:text-gray-300"><Italic size={14} /></button>
+                      <button className="p-1 hover:bg-gray-200 dark:hover:bg-white/10 rounded text-gray-600 dark:text-gray-300"><Underline size={14} /></button>
+                      <div className="w-px h-4 bg-gray-300 dark:bg-white/10 mx-1" />
+                      <button className="p-1 hover:bg-gray-200 dark:hover:bg-white/10 rounded text-gray-600 dark:text-gray-300"><List size={14} /></button>
+                      <button className="p-1 hover:bg-gray-200 dark:hover:bg-white/10 rounded text-gray-600 dark:text-gray-300"><ListOrdered size={14} /></button>
+                      <button className="p-1 hover:bg-gray-200 dark:hover:bg-white/10 rounded text-gray-600 dark:text-gray-300"><LinkIcon size={14} /></button>
                     </div>
                     <textarea 
                       value={formData.description} 
                       onChange={e => setFormData({...formData, description: e.target.value})}
-                      className="w-full bg-gray-100 p-4 text-gray-800 outline-none text-sm min-h-[200px]" 
+                      className="w-full bg-gray-100 dark:bg-[#111421] p-4 text-gray-800 dark:text-white outline-none text-sm min-h-[200px]" 
                     />
                   </div>
                 </div>
               </div>
 
-              <div className="space-y-6">
-                <h3 className="text-lg font-bold text-gray-800">Property Price</h3>
+              <div className="space-y-6 pt-6 border-t border-gray-200 dark:border-white/10">
+                <h4 className="text-sm font-bold text-gray-800 dark:text-white">Property Price</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <Input label="Price in $ (only numbers)" field="price" value={formData.price} />
                   <Input label="After Price Label (ex: '/month')" field="afterPriceLabel" value={formData.afterPriceLabel} />
@@ -378,36 +370,30 @@ export const AddListingPage: React.FC<AddListingPageProps> = ({ userRole, onAddP
                 </div>
               </div>
 
-              <div className="space-y-6">
-                <h3 className="text-lg font-bold text-gray-800">Select Categories</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-6 pt-6 border-t border-gray-200 dark:border-white/10">
+                <h4 className="text-sm font-bold text-gray-800 dark:text-white">Categories & Status</h4>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <Select label="Category" field="category" value={formData.category} options={['None', 'Apartment', 'House', 'Villa', 'Office', 'Retail']} />
                   <Select label="Listed In" field="listedIn" value={formData.listedIn} options={['None', 'Rent', 'Sale']} />
+                  <Select label="Property Status" field="propertyStatus" value={formData.propertyStatus} options={['No status', 'Hot Offer', 'Open House', 'Sold']} />
                 </div>
-              </div>
-
-              <div className="space-y-6">
-                <h3 className="text-lg font-bold text-gray-800">Select Property Status</h3>
-                <Select label="Property Status" field="propertyStatus" value={formData.propertyStatus} options={['No status', 'Hot Offer', 'Open House', 'Sold']} />
               </div>
             </div>
-          )}
+          </CollapsibleSection>
 
-          {/* STEP 2: MEDIA */}
-          {currentStep === 2 && (
+          <CollapsibleSection title="2. Listing Media" defaultOpen={false}>
             <div className="space-y-8">
               <div className="space-y-6">
-                <h3 className="text-lg font-bold text-gray-800">Listing Media</h3>
                 <div 
                   onClick={() => fileInputRef.current?.click()}
-                  className="border-2 border-dashed border-gray-300 rounded-lg p-12 flex flex-col items-center justify-center bg-gray-50 cursor-pointer hover:bg-gray-100 transition-all"
+                  className="border-2 border-dashed border-gray-300 dark:border-white/20 rounded-xl p-12 flex flex-col items-center justify-center bg-gray-50 dark:bg-[#1a1d2d] cursor-pointer hover:bg-gray-100 dark:hover:bg-white/5 transition-all"
                 >
-                  <Upload className="text-blue-500 mb-4" size={48} />
-                  <p className="text-sm font-bold text-gray-600">Drag and Drop images or</p>
-                  <button className="mt-4 bg-[#26A69A] text-white px-6 py-2 rounded font-bold text-sm">Select Media</button>
+                  <Upload className="text-blue-500 dark:text-[#8DC63F] mb-4" size={48} />
+                  <p className="text-sm font-bold text-gray-600 dark:text-gray-400">Drag and Drop images or</p>
+                  <button className="mt-4 bg-[#26A69A] dark:bg-[#8DC63F] text-white dark:text-black px-6 py-2 rounded-lg font-bold text-sm">Select Media</button>
                   <input type="file" ref={fileInputRef} onChange={handleFileChange} multiple accept="image/*" className="hidden" />
                 </div>
-                <p className="text-[10px] text-gray-500 leading-relaxed">
+                <p className="text-[10px] text-gray-500 dark:text-gray-400 leading-relaxed">
                   * At least 1 image is required for a valid submission. Minimum size is 500/500px.<br />
                   You can upload maximum 5 images.<br />
                   ** Double click on the image to select featured.<br />
@@ -416,7 +402,7 @@ export const AddListingPage: React.FC<AddListingPageProps> = ({ userRole, onAddP
                   ***** Images might take longer to be processed.
                 </p>
                 {formData.images.length > 0 && (
-                  <div className="grid grid-cols-5 gap-4">
+                  <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                     {formData.images.map((img, i) => (
                       <div 
                         key={i} 
@@ -434,19 +420,19 @@ export const AddListingPage: React.FC<AddListingPageProps> = ({ userRole, onAddP
                             return { ...prev, images: newImages };
                           });
                         }}
-                        className={`relative aspect-square rounded-lg overflow-hidden border-2 cursor-move transition-all ${draggedIndex === i ? 'opacity-50 border-blue-500' : 'border-gray-200 hover:border-blue-300'}`}
+                        className={`relative aspect-square rounded-lg overflow-hidden border-2 cursor-move transition-all ${draggedIndex === i ? 'opacity-50 border-blue-500 dark:border-[#8DC63F]' : 'border-gray-200 dark:border-white/10 hover:border-blue-300 dark:hover:border-[#8DC63F]/50'}`}
                       >
                         <img src={img} className="w-full h-full object-cover pointer-events-none" />
                         {i === 0 && (
-                          <div className="absolute bottom-0 left-0 right-0 bg-blue-500/80 text-white text-[10px] font-bold text-center py-1">
+                          <div className="absolute bottom-0 left-0 right-0 bg-blue-500/80 dark:bg-[#8DC63F]/90 text-white dark:text-black text-[10px] font-bold text-center py-1">
                             FEATURED
                           </div>
                         )}
                         <button 
                           onClick={() => setFormData(prev => ({...prev, images: prev.images.filter((_, idx) => idx !== i)}))}
-                          className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full hover:bg-red-600 transition-colors z-10"
+                          className="absolute top-1 right-1 bg-red-500 text-white p-1.5 rounded-full hover:bg-red-600 transition-colors z-10 shadow-lg"
                         >
-                          <X size={10} />
+                          <X size={12} />
                         </button>
                       </div>
                     ))}
@@ -454,33 +440,31 @@ export const AddListingPage: React.FC<AddListingPageProps> = ({ userRole, onAddP
                 )}
               </div>
 
-              <div className="space-y-6">
-                <h3 className="text-lg font-bold text-gray-800">Video Option</h3>
+              <div className="space-y-6 pt-6 border-t border-gray-200 dark:border-white/10">
+                <h4 className="text-sm font-bold text-gray-800 dark:text-white">Video Option</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <Select label="Video from" field="videoFrom" value={formData.videoFrom} options={['Vimeo', 'YouTube', 'TikTok']} />
                   <Input label="Embed Video ID" field="videoId" value={formData.videoId} />
                 </div>
               </div>
 
-              <div className="space-y-6">
-                <h3 className="text-lg font-bold text-gray-800">Virtual Tour</h3>
+              <div className="space-y-6 pt-6 border-t border-gray-200 dark:border-white/10">
+                <h4 className="text-sm font-bold text-gray-800 dark:text-white">Virtual Tour</h4>
                 <div className="space-y-2">
-                  <label className="text-xs font-bold text-gray-700">Virtual Tour / Meta Reels</label>
+                  <label className="text-xs font-bold text-gray-700 dark:text-gray-300">Virtual Tour / Meta Reels</label>
                   <textarea 
                     value={formData.virtualTour} 
                     onChange={e => setFormData({...formData, virtualTour: e.target.value})}
-                    className="w-full bg-gray-100 border border-gray-200 rounded-md p-4 text-gray-800 outline-none text-sm min-h-[100px]" 
+                    className="w-full bg-gray-100 dark:bg-[#111421] border border-gray-200 dark:border-white/10 rounded-md p-4 text-gray-800 dark:text-white outline-none text-sm min-h-[100px]" 
                   />
                 </div>
               </div>
             </div>
-          )}
+          </CollapsibleSection>
 
-          {/* STEP 3: LOCATION */}
-          {currentStep === 3 && (
+          <CollapsibleSection title="3. Listing Location" defaultOpen={false}>
             <div className="space-y-8">
               <div className="space-y-6">
-                <h3 className="text-lg font-bold text-gray-800">Listing Location</h3>
                 <Input label="*Address" field="address" value={formData.address} placeholder="Enter address" />
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <Input label="County / State" field="county" value={formData.county} />
@@ -491,14 +475,14 @@ export const AddListingPage: React.FC<AddListingPageProps> = ({ userRole, onAddP
                 <Select label="Country" field="country" value={formData.country} options={['United States', 'Uganda', 'United Kingdom', 'Canada']} />
               </div>
 
-              <div className="space-y-4">
-                <div className="w-full h-64 bg-gray-200 rounded-lg flex items-center justify-center overflow-hidden relative">
+              <div className="space-y-4 pt-6 border-t border-gray-200 dark:border-white/10">
+                <div className="w-full h-64 bg-gray-200 dark:bg-[#1a1d2d] rounded-xl flex items-center justify-center overflow-hidden relative">
                   <img src="https://picsum.photos/seed/map/1200/600" className="w-full h-full object-cover opacity-50" />
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="bg-white p-4 rounded shadow-lg flex flex-col items-center">
+                    <div className="bg-white dark:bg-[#111421] p-4 rounded-xl shadow-xl flex flex-col items-center border border-gray-100 dark:border-white/10">
                       <MapPin className="text-red-500 mb-2" size={24} />
-                      <p className="text-[10px] font-bold text-gray-600">Latitude: 40.7077431</p>
-                      <p className="text-[10px] font-bold text-gray-600">Longitude: -74.0139144</p>
+                      <p className="text-[10px] font-bold text-gray-600 dark:text-gray-400">Latitude: 40.7077431</p>
+                      <p className="text-[10px] font-bold text-gray-600 dark:text-gray-400">Longitude: -74.0139144</p>
                     </div>
                   </div>
                 </div>
@@ -507,26 +491,24 @@ export const AddListingPage: React.FC<AddListingPageProps> = ({ userRole, onAddP
                   <Input label="Longitude (for Maps Coordinates)" field="longitude" value={formData.longitude} />
                   <Input label="Google Street View - Camera Angle (value from 0 to 360)" field="googleStreetViewAngle" value={formData.googleStreetViewAngle} />
                 </div>
-                <div className="flex gap-12">
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" checked={formData.enableStreetView} onChange={() => setFormData({...formData, enableStreetView: !formData.enableStreetView})} className="rounded text-blue-600" />
-                    <span className="text-xs text-gray-600">Enable Google Street View</span>
+                <div className="flex flex-col sm:flex-row gap-6 sm:gap-12">
+                  <label className="flex items-center gap-3 cursor-pointer group">
+                    <input type="checkbox" checked={formData.enableStreetView} onChange={() => setFormData({...formData, enableStreetView: !formData.enableStreetView})} className="w-4 h-4 rounded text-blue-600 dark:text-[#8DC63F] bg-white dark:bg-[#111421] border-gray-300 dark:border-white/20" />
+                    <span className="text-sm text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">Enable Google Street View</span>
                   </label>
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" checked={formData.hideMapMarker} onChange={() => setFormData({...formData, hideMapMarker: !formData.hideMapMarker})} className="rounded text-blue-600" />
-                    <span className="text-xs text-gray-600">Hide Map Marker</span>
+                  <label className="flex items-center gap-3 cursor-pointer group">
+                    <input type="checkbox" checked={formData.hideMapMarker} onChange={() => setFormData({...formData, hideMapMarker: !formData.hideMapMarker})} className="w-4 h-4 rounded text-blue-600 dark:text-[#8DC63F] bg-white dark:bg-[#111421] border-gray-300 dark:border-white/20" />
+                    <span className="text-sm text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">Hide Map Marker</span>
                   </label>
                 </div>
               </div>
             </div>
-          )}
+          </CollapsibleSection>
 
-          {/* STEP 4: DETAILS */}
-          {currentStep === 4 && (
+          <CollapsibleSection title="4. Listing Details" defaultOpen={false}>
             <div className="space-y-8">
               <div className="space-y-6">
-                <h3 className="text-lg font-bold text-gray-800">Listing Details</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <Input label="Size in ft2 (*only numbers)" field="size" value={formData.size} />
                   <Input label="Lot Size in ac (*only numbers)" field="lotSize" value={formData.lotSize} />
                   <Input label="Rooms (*only numbers)" field="rooms" value={formData.rooms} />
@@ -545,111 +527,85 @@ export const AddListingPage: React.FC<AddListingPageProps> = ({ userRole, onAddP
                   <Select label="Floors No" field="floorsNo" value={formData.floorsNo} options={['Not Available', '1', '2', '3', '4+']} />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-xs font-bold text-gray-700">Owner/Agent notes (*not visible on front end)</label>
+                  <label className="text-xs font-bold text-gray-700 dark:text-gray-300">Owner/Agent notes (*not visible on front end)</label>
                   <textarea 
                     value={formData.ownerNotes} 
                     onChange={e => setFormData({...formData, ownerNotes: e.target.value})}
-                    className="w-full bg-gray-100 border border-gray-200 rounded-md p-4 text-gray-800 outline-none text-sm min-h-[100px]" 
+                    className="w-full bg-gray-100 dark:bg-[#111421] border border-gray-200 dark:border-white/10 rounded-md p-4 text-gray-800 dark:text-white outline-none text-sm min-h-[100px]" 
                   />
                 </div>
               </div>
 
-              <div className="space-y-6">
-                <h3 className="text-lg font-bold text-gray-800">Select Energy Class</h3>
+              <div className="space-y-6 pt-6 border-t border-gray-200 dark:border-white/10">
+                <h4 className="text-sm font-bold text-gray-800 dark:text-white">Energy Class</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <Select label="Energy Class" field="energyClass" value={formData.energyClass} options={['Select Energy Class (EU regulation)', 'A+', 'A', 'B', 'C', 'D', 'E', 'F', 'G']} />
                   <Input label="Energy Index in kWh/m2a" field="energyIndex" value={formData.energyIndex} />
                 </div>
               </div>
             </div>
-          )}
+          </CollapsibleSection>
 
-          {/* STEP 5: AMENITIES */}
-          {currentStep === 5 && (
+          <CollapsibleSection title="5. Amenities and Features" defaultOpen={false}>
             <div className="space-y-8">
-              <div className="space-y-6">
-                <h3 className="text-lg font-bold text-gray-800">Amenities and Features</h3>
-                
-                <div className="space-y-4">
-                  <h4 className="text-sm font-bold text-gray-700">Interior Details</h4>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                    <Checkbox label="Equipped Kitchen" field="equippedKitchen" />
-                    <Checkbox label="Gym" field="gym" />
-                    <Checkbox label="Laundry" field="laundry" />
-                    <Checkbox label="Media Room" field="mediaRoom" />
-                  </div>
+              <div className="space-y-4">
+                <h4 className="text-sm font-bold text-gray-700 dark:text-gray-300">Interior Details</h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                  <Checkbox label="Equipped Kitchen" field="equippedKitchen" />
+                  <Checkbox label="Gym" field="gym" />
+                  <Checkbox label="Laundry" field="laundry" />
+                  <Checkbox label="Media Room" field="mediaRoom" />
                 </div>
+              </div>
 
-                <div className="space-y-4">
-                  <h4 className="text-sm font-bold text-gray-700">Outdoor Details</h4>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                    <Checkbox label="Back yard" field="backYard" />
-                    <Checkbox label="Basketball court" field="basketballCourt" />
-                    <Checkbox label="Front yard" field="frontYard" />
-                    <Checkbox label="Garage Attached" field="garageAttached" />
-                    <Checkbox label="Hot Bath" field="hotBath" />
-                    <Checkbox label="Pool" field="pool" />
-                  </div>
+              <div className="space-y-4 pt-6 border-t border-gray-200 dark:border-white/10">
+                <h4 className="text-sm font-bold text-gray-700 dark:text-gray-300">Outdoor Details</h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                  <Checkbox label="Back yard" field="backYard" />
+                  <Checkbox label="Basketball court" field="basketballCourt" />
+                  <Checkbox label="Front yard" field="frontYard" />
+                  <Checkbox label="Garage Attached" field="garageAttached" />
+                  <Checkbox label="Hot Bath" field="hotBath" />
+                  <Checkbox label="Pool" field="pool" />
                 </div>
+              </div>
 
-                <div className="space-y-4">
-                  <h4 className="text-sm font-bold text-gray-700">Utilities</h4>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                    <Checkbox label="Central Air" field="centralAir" />
-                    <Checkbox label="Electricity" field="electricity" />
-                    <Checkbox label="Heating" field="heating" />
-                    <Checkbox label="Natural Gas" field="naturalGas" />
-                    <Checkbox label="Ventilation" field="ventilation" />
-                    <Checkbox label="Water" field="water" />
-                  </div>
+              <div className="space-y-4 pt-6 border-t border-gray-200 dark:border-white/10">
+                <h4 className="text-sm font-bold text-gray-700 dark:text-gray-300">Utilities</h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                  <Checkbox label="Central Air" field="centralAir" />
+                  <Checkbox label="Electricity" field="electricity" />
+                  <Checkbox label="Heating" field="heating" />
+                  <Checkbox label="Natural Gas" field="naturalGas" />
+                  <Checkbox label="Ventilation" field="ventilation" />
+                  <Checkbox label="Water" field="water" />
                 </div>
+              </div>
 
-                <div className="space-y-4">
-                  <h4 className="text-sm font-bold text-gray-700">Other Features</h4>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                    <Checkbox label="Chair Accessible" field="chairAccessible" />
-                    <Checkbox label="Elevator" field="elevator" />
-                    <Checkbox label="Fireplace" field="fireplace" />
-                    <Checkbox label="Smoke detectors" field="smokeDetectors" />
-                    <Checkbox label="Washer and dryer" field="washerDryer" />
-                    <Checkbox label="WiFi" field="wifi" />
-                  </div>
+              <div className="space-y-4 pt-6 border-t border-gray-200 dark:border-white/10">
+                <h4 className="text-sm font-bold text-gray-700 dark:text-gray-300">Other Features</h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                  <Checkbox label="Chair Accessible" field="chairAccessible" />
+                  <Checkbox label="Elevator" field="elevator" />
+                  <Checkbox label="Fireplace" field="fireplace" />
+                  <Checkbox label="Smoke detectors" field="smokeDetectors" />
+                  <Checkbox label="Washer and dryer" field="washerDryer" />
+                  <Checkbox label="WiFi" field="wifi" />
                 </div>
               </div>
             </div>
-          )}
+          </CollapsibleSection>
 
           {/* Footer Actions */}
-          <div className="pt-8 flex justify-between gap-4">
-            <div className="flex gap-4">
-              {currentStep > 1 && (
-                <button 
-                  onClick={handlePrev}
-                  className="px-8 py-3 bg-[#0073e1] text-white rounded font-bold text-sm hover:bg-blue-700 transition-all"
-                >
-                  Prev Step
-                </button>
-              )}
-            </div>
-            
-            <div className="flex gap-4">
-              {currentStep < 5 ? (
-                <button 
-                  onClick={handleNext}
-                  className="bg-[#0073e1] text-white px-8 py-3 rounded font-bold text-sm hover:bg-blue-700 transition-all"
-                >
-                  Next Step
-                </button>
-              ) : (
-                <button 
-                  onClick={handleFinalize}
-                  disabled={isVerifying}
-                  className="bg-[#0073e1] text-white px-8 py-3 rounded font-bold text-sm hover:bg-blue-700 transition-all disabled:opacity-50"
-                >
-                  {isVerifying ? <Loader2 className="animate-spin" /> : 'Submit Property'}
-                </button>
-              )}
-            </div>
+          <div className="pt-8 flex justify-end">
+            <button 
+              onClick={handleFinalize}
+              disabled={isVerifying}
+              className="bg-[#0073e1] dark:bg-[#8DC63F] text-white dark:text-black px-10 py-4 rounded-xl font-black uppercase tracking-widest text-sm hover:bg-blue-700 dark:hover:bg-[#7ab033] transition-all disabled:opacity-50 shadow-xl shadow-blue-500/20 dark:shadow-[#8DC63F]/20 flex items-center gap-2"
+            >
+              {isVerifying ? <Loader2 className="animate-spin" /> : 'Submit Property'}
+              {!isVerifying && <CheckCircle2 size={18} />}
+            </button>
           </div>
         </div>
       </div>

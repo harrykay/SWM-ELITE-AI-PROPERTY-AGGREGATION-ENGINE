@@ -74,7 +74,8 @@ const initDb = async () => {
         id SERIAL PRIMARY KEY,
         title TEXT NOT NULL,
         slug TEXT UNIQUE NOT NULL,
-        content TEXT,
+        content JSONB,
+        is_visual BOOLEAN DEFAULT false,
         status TEXT DEFAULT 'draft', -- draft, published, scheduled, archived
         layout TEXT DEFAULT 'default',
         meta_title TEXT,
@@ -311,12 +312,12 @@ app.get('/api/cms/pages', async (req, res) => {
 });
 
 app.post('/api/cms/pages', requireRole(['admin', 'manager']), async (req, res) => {
-  const { title, slug, content, status, layout, meta_title, meta_description, meta_keywords, featured_image, scheduled_at } = req.body;
+  const { title, slug, content, is_visual, status, layout, meta_title, meta_description, meta_keywords, featured_image, scheduled_at } = req.body;
   try {
     const result = await pool.query(
-      `INSERT INTO pages (title, slug, content, status, layout, meta_title, meta_description, meta_keywords, featured_image, scheduled_at) 
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *`,
-      [title, slug, content, status || 'draft', layout || 'default', meta_title, meta_description, meta_keywords, featured_image, scheduled_at]
+      `INSERT INTO pages (title, slug, content, is_visual, status, layout, meta_title, meta_description, meta_keywords, featured_image, scheduled_at) 
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *`,
+      [title, slug, content, is_visual || false, status || 'draft', layout || 'default', meta_title, meta_description, meta_keywords, featured_image, scheduled_at]
     );
     res.status(201).json(result.rows[0]);
   } catch (err) {
@@ -326,12 +327,12 @@ app.post('/api/cms/pages', requireRole(['admin', 'manager']), async (req, res) =
 
 app.put('/api/cms/pages/:id', requireRole(['admin', 'manager']), async (req, res) => {
   const { id } = req.params;
-  const { title, slug, content, status, layout, meta_title, meta_description, meta_keywords, featured_image, scheduled_at } = req.body;
+  const { title, slug, content, is_visual, status, layout, meta_title, meta_description, meta_keywords, featured_image, scheduled_at } = req.body;
   try {
     const result = await pool.query(
-      `UPDATE pages SET title = $1, slug = $2, content = $3, status = $4, layout = $5, meta_title = $6, meta_description = $7, meta_keywords = $8, featured_image = $9, scheduled_at = $10, updated_at = CURRENT_TIMESTAMP 
-       WHERE id = $11 RETURNING *`,
-      [title, slug, content, status, layout, meta_title, meta_description, meta_keywords, featured_image, scheduled_at, id]
+      `UPDATE pages SET title = $1, slug = $2, content = $3, is_visual = $4, status = $5, layout = $6, meta_title = $7, meta_description = $8, meta_keywords = $9, featured_image = $10, scheduled_at = $11, updated_at = CURRENT_TIMESTAMP 
+       WHERE id = $12 RETURNING *`,
+      [title, slug, content, is_visual, status, layout, meta_title, meta_description, meta_keywords, featured_image, scheduled_at, id]
     );
     res.json(result.rows[0]);
   } catch (err) {
@@ -339,7 +340,7 @@ app.put('/api/cms/pages/:id', requireRole(['admin', 'manager']), async (req, res
   }
 });
 
-app.delete('/api/cms/pages/:id', requireRole(['admin', 'manager']), async (req, res) => {
+app.delete('/api/cms/pages/:id', requireRole('admin'), async (req, res) => {
   const { id } = req.params;
   try {
     await pool.query('UPDATE pages SET deleted_at = CURRENT_TIMESTAMP WHERE id = $1', [id]);
@@ -398,7 +399,7 @@ app.put('/api/cms/posts/:id', requireRole(['admin', 'manager']), async (req, res
   }
 });
 
-app.delete('/api/cms/posts/:id', requireRole(['admin', 'manager']), async (req, res) => {
+app.delete('/api/cms/posts/:id', requireRole('admin'), async (req, res) => {
   const { id } = req.params;
   try {
     await pool.query('UPDATE posts SET deleted_at = CURRENT_TIMESTAMP WHERE id = $1', [id]);
@@ -469,7 +470,7 @@ app.put('/api/cms/media/:id', requireRole(['admin', 'manager']), async (req, res
   }
 });
 
-app.delete('/api/cms/media/:id', requireRole(['admin', 'manager']), async (req, res) => {
+app.delete('/api/cms/media/:id', requireRole('admin'), async (req, res) => {
   const { id } = req.params;
   try {
     await pool.query('UPDATE media SET deleted_at = CURRENT_TIMESTAMP WHERE id = $1', [id]);
@@ -640,7 +641,7 @@ app.post('/api/properties', requireRole(['admin', 'manager']), async (req, res) 
   }
 });
 
-app.delete('/api/properties/:id', requireRole(['admin', 'manager']), async (req, res) => {
+app.delete('/api/properties/:id', requireRole('admin'), async (req, res) => {
   const { id } = req.params;
   try {
     const result = await pool.query('DELETE FROM properties WHERE id = $1 RETURNING id', [id]);
@@ -728,7 +729,7 @@ app.put('/api/projects/:id', requireRole(['admin', 'manager']), async (req, res)
   }
 });
 
-app.delete('/api/projects/:id', requireRole(['admin', 'manager']), async (req, res) => {
+app.delete('/api/projects/:id', requireRole('admin'), async (req, res) => {
   const { id } = req.params;
   try {
     const result = await pool.query('DELETE FROM projects WHERE id = $1 RETURNING id', [id]);
@@ -813,7 +814,7 @@ app.put('/api/blogs/:id', requireRole(['admin', 'manager']), async (req, res) =>
   }
 });
 
-app.delete('/api/blogs/:id', requireRole(['admin', 'manager']), async (req, res) => {
+app.delete('/api/blogs/:id', requireRole('admin'), async (req, res) => {
   const { id } = req.params;
   try {
     const result = await pool.query('DELETE FROM blogs WHERE id = $1 RETURNING id', [id]);

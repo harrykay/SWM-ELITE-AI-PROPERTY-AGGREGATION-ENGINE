@@ -11,6 +11,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 import { UserManager } from './UserManager';
 import { ProjectManager } from './ProjectManager';
+import { PageBuilder } from './PageBuilder';
+import { ImageUploader } from './ImageUploader';
 
 type CMSTab = 'pages' | 'posts' | 'projects' | 'media' | 'menus' | 'design' | 'users';
 
@@ -47,6 +49,7 @@ export const CMSManager: React.FC = () => {
         {activeTab === 'pages' && <PageManager />}
         {activeTab === 'posts' && <PostManager />}
         {activeTab === 'projects' && <ProjectManager />}
+
         {activeTab === 'media' && <MediaLibrary />}
         {activeTab === 'menus' && <MenuManager />}
         {activeTab === 'design' && <DesignCustomizer />}
@@ -134,7 +137,15 @@ const PageManager = () => {
         <div className="bg-[#111421] rounded-[2.5rem] p-10 border border-white/5 space-y-8">
           <div className="flex justify-between items-center">
             <h4 className="text-xl font-black text-white uppercase tracking-tighter">{currentPage.id ? 'Edit Page' : 'New Page'}</h4>
-            <button onClick={() => setIsEditing(false)} className="text-gray-500 hover:text-white"><X size={24} /></button>
+            <div className="flex items-center gap-4">
+              <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">Visual Builder</span>
+              <button 
+                onClick={() => setCurrentPage({...currentPage, is_visual: !currentPage.is_visual})}
+                className={`w-12 h-6 rounded-full relative transition-colors ${currentPage.is_visual ? 'bg-[#8DC63F]' : 'bg-gray-800'}`}>
+                <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${currentPage.is_visual ? 'right-1' : 'left-1'}`}></div>
+              </button>
+              <button onClick={() => setIsEditing(false)} className="text-gray-500 hover:text-white"><X size={24} /></button>
+            </div>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -190,18 +201,34 @@ const PageManager = () => {
                   className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-[#8DC63F]/50 transition-all resize-none h-24" 
                 />
               </div>
+              <div className="space-y-2 pt-4 border-t border-white/10">
+                <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1">Schedule Publish Date</label>
+                <input 
+                  type="datetime-local"
+                  value={currentPage.scheduled_at ? new Date(currentPage.scheduled_at).toISOString().slice(0, 16) : ''}
+                  onChange={e => setCurrentPage({ ...currentPage, scheduled_at: e.target.value || null })}
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-[#8DC63F]/50 transition-all"
+                />
+              </div>
             </div>
           </div>
 
           <div className="space-y-2">
-            <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1">Page Content (Markdown/HTML)</label>
-            <textarea 
-              rows={15}
-              value={currentPage.content} 
-              onChange={e => setCurrentPage({...currentPage, content: e.target.value})}
-              className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white font-bold outline-none focus:border-[#8DC63F]/50 transition-all resize-none font-mono text-sm" 
-              placeholder="Enter page content here..."
-            />
+            <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1">Page Content</label>
+            {currentPage.is_visual ? (
+              <PageBuilder 
+                content={currentPage.content}
+                onContentChange={(newContent) => setCurrentPage({...currentPage, content: newContent})}
+              />
+            ) : (
+              <textarea 
+                rows={15}
+                value={currentPage.content} 
+                onChange={e => setCurrentPage({...currentPage, content: e.target.value})}
+                className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white font-bold outline-none focus:border-[#8DC63F]/50 transition-all resize-none font-mono text-sm" 
+                placeholder="Enter page content here..."
+              />
+            )}
           </div>
 
           <div className="flex justify-between items-center pt-8 border-t border-white/5">
@@ -219,13 +246,24 @@ const PageManager = () => {
               >
                 {loading ? 'Processing...' : 'Save Draft'}
               </button>
-              <button 
-                disabled={loading}
-                onClick={() => handleSave('published')}
-                className="bg-[#8DC63F] text-black px-10 py-4 rounded-xl font-black uppercase text-[10px] tracking-widest shadow-xl shadow-[#8DC63F]/20 disabled:opacity-50"
-              >
-                {loading ? 'Synchronizing...' : 'Publish Page'}
-              </button>
+              {currentPage.scheduled_at ? (
+                <button 
+                  disabled={loading}
+                  onClick={() => handleSave('scheduled')}
+                  className="bg-blue-500 text-white px-10 py-4 rounded-xl font-black uppercase text-[10px] tracking-widest shadow-xl shadow-blue-500/20 disabled:opacity-50 flex items-center gap-2"
+                >
+                  <Clock size={14} />
+                  {loading ? 'Scheduling...' : 'Schedule'}
+                </button>
+              ) : (
+                <button 
+                  disabled={loading}
+                  onClick={() => handleSave('published')}
+                  className="bg-[#8DC63F] text-black px-10 py-4 rounded-xl font-black uppercase text-[10px] tracking-widest shadow-xl shadow-[#8DC63F]/20 disabled:opacity-50"
+                >
+                  {loading ? 'Synchronizing...' : 'Publish Page'}
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -247,9 +285,21 @@ const PageManager = () => {
                 </div>
               </div>
               <div className="flex items-center gap-4">
-                <span className={`px-3 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest ${page.status === 'published' ? 'bg-[#8DC63F]/10 text-[#8DC63F]' : 'bg-white/5 text-gray-500'}`}>
+                <span className={`px-3 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest ${
+                  page.status === 'published' ? 'bg-[#8DC63F]/10 text-[#8DC63F]' : 
+                  page.status === 'scheduled' ? 'bg-blue-500/10 text-blue-400' : 
+                  'bg-white/5 text-gray-500'
+                }`}>
                   {page.status}
                 </span>
+                {page.status === 'scheduled' && page.scheduled_at && (
+                  <div className="flex items-center gap-2 text-blue-400">
+                    <Clock size={12} />
+                    <p className="text-[10px] font-bold uppercase tracking-widest">
+                      {new Date(page.scheduled_at).toLocaleDateString()}
+                    </p>
+                  </div>
+                )}
                 <button onClick={() => { setCurrentPage(page); setIsEditing(true); }} className="p-3 bg-white/5 rounded-xl text-gray-500 hover:text-white hover:bg-white/10 transition-all"><Edit2 size={16} /></button>
                 <button onClick={() => handleDelete(page.id)} className="p-3 bg-white/5 rounded-xl text-gray-500 hover:text-red-500 hover:bg-red-500/10 transition-all"><Trash2 size={16} /></button>
               </div>

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Loader2, AlertTriangle, Upload, X, CheckCircle2 } from 'lucide-react';
+import { ImageUploader } from './ImageUploader';
 import { Project } from '../App';
 
 interface AddProjectPageProps {
@@ -111,21 +112,8 @@ export const AddProjectPage: React.FC<AddProjectPageProps> = ({ onAddProject }) 
     if (files) processFiles(files, isGallery);
   };
 
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDraggingGallery(true);
-  };
-
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDraggingGallery(false);
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDraggingGallery(false);
-    const files = e.dataTransfer.files;
-    if (files) processFiles(files, true);
+  const handleDrop = (acceptedFiles: File[]) => {
+    processFiles(acceptedFiles, true);
   };
 
   const removeGalleryImage = (index: number) => {
@@ -408,45 +396,11 @@ export const AddProjectPage: React.FC<AddProjectPageProps> = ({ onAddProject }) 
 
               <div className="space-y-2">
                 <label className="text-xs font-bold text-gray-700 dark:text-gray-300">Gallery Images (Max 5)</label>
-                <div 
-                  className={`grid grid-cols-2 md:grid-cols-4 gap-4 p-4 rounded-xl border-2 border-dashed transition-all ${
-                    isDraggingGallery 
-                      ? 'border-[#8DC63F] bg-[#8DC63F]/5 scale-[1.01]' 
-                      : 'border-transparent'
-                  }`}
-                  onDragOver={handleDragOver}
-                  onDragLeave={handleDragLeave}
+                <ImageUploader 
+                  files={formData.gallery.map(url => ({ preview: url }))}
                   onDrop={handleDrop}
-                >
-                  {formData.gallery.map((img, idx) => (
-                    <div key={idx} className="relative aspect-square rounded-lg overflow-hidden group shadow-sm">
-                      <img src={img} alt={`Gallery ${idx}`} className="w-full h-full object-cover" />
-                      <button 
-                        type="button"
-                        onClick={() => removeGalleryImage(idx)}
-                        className="absolute top-2 right-2 bg-red-500 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
-                      >
-                        <X size={14} />
-                      </button>
-                    </div>
-                  ))}
-                  {formData.gallery.length < 5 && (
-                    <label className={`border-2 border-dashed ${isDraggingGallery ? 'border-[#8DC63F]' : 'border-gray-300 dark:border-white/20'} rounded-lg aspect-square flex flex-col items-center justify-center bg-gray-50 dark:bg-[#1a1d2d] cursor-pointer hover:bg-gray-100 dark:hover:bg-white/5 transition-all group`}>
-                      <Upload className={`transition-colors ${isDraggingGallery ? 'text-[#8DC63F]' : 'text-gray-400 group-hover:text-[#8DC63F]'}`} size={24} />
-                      <span className="text-[10px] font-bold text-gray-500 mt-2">Add or Drop</span>
-                      <input type="file" accept="image/*" multiple className="hidden" onChange={(e) => handleImageUpload(e, true)} />
-                    </label>
-                  )}
-                </div>
-                {isDraggingGallery && (
-                  <motion.p 
-                    initial={{ opacity: 0, y: 5 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="text-[10px] text-[#8DC63F] font-black uppercase tracking-widest text-center mt-2"
-                  >
-                    Release to upload to gallery
-                  </motion.p>
-                )}
+                  onRemoveFile={removeGalleryImage}
+                />
               </div>
             </div>
 

@@ -420,7 +420,8 @@ const App: React.FC = () => {
     }
   };
 
-  if (!auth) {
+  const protectedRoutes = ['dashboard', 'manage-content', 'add-listing', 'add-project'];
+  if (!auth && (currentPage === 'login' || protectedRoutes.includes(currentPage))) {
     return <LoginPage onLogin={handleLogin} />;
   }
 
@@ -467,7 +468,6 @@ const App: React.FC = () => {
               <CTA />
             </div>
           )}
-          {currentPage === 'login' && <LoginPage onLogin={handleLogin} />}
           {currentPage === 'properties' && <PropertiesPage properties={properties} onPropertyClick={(id) => handleNavigate('single-property', { id })} currency={currency} />}
           {currentPage === 'projects' && <ProjectsPage projects={projects} onProjectClick={(id) => handleNavigate('single-project', { id })} />}
           {currentPage === 'blog' && <BlogPage blogs={blogs} onBlogClick={(slug) => handleNavigate('single-blog', { slug })} />}
