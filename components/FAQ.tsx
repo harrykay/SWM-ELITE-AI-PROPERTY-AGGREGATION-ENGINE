@@ -22,7 +22,11 @@ const faqs = [
   }
 ];
 
-export const FAQ: React.FC = () => {
+interface FAQProps {
+  onNavigate?: (page: string) => void;
+}
+
+export const FAQ: React.FC<FAQProps> = ({ onNavigate }) => {
   const [activeIndex, setActiveIndex] = useState<number | null>(0);
 
   return (
@@ -74,7 +78,10 @@ export const FAQ: React.FC = () => {
                       <p className="text-gray-500 dark:text-gray-400 font-medium leading-relaxed border-t border-gray-100 dark:border-white/5 pt-6">
                         {faq.answer}
                       </p>
-                      <button className="mt-8 flex items-center gap-2 text-[10px] font-black uppercase text-[#8DC63F] tracking-widest hover:gap-4 transition-all">
+                      <button 
+                        onClick={() => onNavigate?.('about')}
+                        className="mt-8 flex items-center gap-2 text-[10px] font-black uppercase text-[#8DC63F] tracking-widest hover:gap-4 transition-all"
+                      >
                         Learn more protocol <ChevronRight size={14} />
                       </button>
                     </div>

@@ -10,7 +10,21 @@ const ecosystems = [
   { label: 'Investor', icon: <TrendingUp size={28} />, color: '#9c27b0' },
 ];
 
-export const EcosystemGrid: React.FC = () => {
+interface EcosystemGridProps {
+  onNavigate: (page: string) => void;
+}
+
+export const EcosystemGrid: React.FC<EcosystemGridProps> = ({ onNavigate }) => {
+  const handleItemClick = (label: string) => {
+    switch (label) {
+      case 'Buyer': onNavigate('properties'); break;
+      case 'Seller': onNavigate('dashboard'); break;
+      case 'Investor': onNavigate('projects'); break;
+      case 'Admin': onNavigate('login'); break;
+      default: onNavigate('login');
+    }
+  };
+
   return (
     <section className="py-24 bg-white overflow-hidden">
       <div className="max-w-7xl mx-auto px-6 text-center">
@@ -28,6 +42,7 @@ export const EcosystemGrid: React.FC = () => {
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               whileInView={{ opacity: 1, scale: 1, y: 0 }}
               transition={{ delay: i * 0.1 }}
+              onClick={() => handleItemClick(item.label)}
               className="flex flex-col items-center group cursor-pointer"
             >
               <div className="relative w-28 h-28 md:w-36 md:h-36 flex items-center justify-center">

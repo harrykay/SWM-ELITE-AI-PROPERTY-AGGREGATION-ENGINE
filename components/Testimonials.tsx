@@ -71,7 +71,7 @@ export const Testimonials: React.FC = () => {
 
               <div className="flex items-center gap-5 pt-8 border-t border-gray-50 dark:border-white/5">
                 <div className="relative">
-                   <img src={t.avatar} className="w-14 h-14 rounded-2xl object-cover grayscale group-hover:grayscale-0 transition-all duration-500" alt={t.name} />
+                   <img src={t.avatar} className="w-14 h-14 rounded-2xl object-cover grayscale group-hover:grayscale-0 transition-all duration-500" alt={t.name} referrerPolicy="no-referrer" />
                    {t.verified && (
                      <div className="absolute -bottom-2 -right-2 bg-[#8DC63F] text-white p-1 rounded-lg border-2 border-white dark:border-[#161925]">
                        <ShieldCheck size={12} />

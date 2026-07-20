@@ -9,15 +9,17 @@ import {
   Maximize, Bed, Bath, Send, Loader2, CreditCard, ShieldCheck
 } from 'lucide-react';
 import { Property, Currency, formatPrice, UGX_RATE } from '../App';
+import { ImageCarousel } from './ImageCarousel';
 
 interface SinglePropertyPageProps {
   property: Property;
   isComparing?: boolean;
   onToggleCompare?: () => void;
   currency: Currency;
+  onNavigate: (page: string) => void;
 }
 
-export const SinglePropertyPage: React.FC<SinglePropertyPageProps> = ({ property, isComparing = false, onToggleCompare, currency }) => {
+export const SinglePropertyPage: React.FC<SinglePropertyPageProps> = ({ property, isComparing = false, onToggleCompare, currency, onNavigate }) => {
   const [isSaved, setIsSaved] = useState(false);
   const [purchaseStatus, setPurchaseStatus] = useState<'idle' | 'processing' | 'success' | 'error'>('idle');
   const [bookingStatus, setBookingStatus] = useState<'idle' | 'processing' | 'success'>('idle');
@@ -114,8 +116,8 @@ export const SinglePropertyPage: React.FC<SinglePropertyPageProps> = ({ property
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
           <div className="lg:col-span-8 space-y-12">
             <div className="aspect-[16/9] rounded-[3rem] overflow-hidden shadow-2xl relative border border-gray-100 dark:border-white/5">
-               <img src={property.images && property.images.length > 0 ? property.images[0] : 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=1200&q=80'} className="w-full h-full object-cover" alt={property.title} />
-               <div className="absolute top-8 left-8 bg-[#8DC63F] text-black px-8 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl">{property.status}</div>
+               <ImageCarousel images={property.images && property.images.length > 0 ? property.images : ['https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=1200&q=80']} alt={property.title} />
+               <div className="absolute top-8 left-8 bg-[#8DC63F] text-black px-8 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl pointer-events-none z-30">{property.status}</div>
             </div>
 
             {/* ... Content details continue ... */}
@@ -219,7 +221,35 @@ export const SinglePropertyPage: React.FC<SinglePropertyPageProps> = ({ property
                 <p className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-2">Technical Valuation</p>
                 <h4 className="text-4xl md:text-5xl font-black text-gray-900 dark:text-white tracking-tighter">{formatPrice(property.price, currency)}</h4>
               </div>
-              {/* ... Buttons and pricing nodes ... */}
+
+              <div className="space-y-4">
+                <button 
+                  onClick={handlePurchase}
+                  className="w-full bg-[#8DC63F] text-black py-6 rounded-[2rem] font-black text-xs uppercase tracking-[0.4em] transition-all hover:bg-white flex items-center justify-center gap-4 shadow-2xl shadow-[#8DC63F]/10"
+                >
+                  {purchaseStatus === 'processing' ? <Loader2 className="animate-spin" size={20} /> : <CreditCard size={20} />}
+                  Initialize Purchase
+                </button>
+                <button 
+                  onClick={handleBooking}
+                  className="w-full bg-white/5 border border-white/10 text-white py-6 rounded-[2rem] font-black text-xs uppercase tracking-[0.4em] transition-all hover:bg-white/10 flex items-center justify-center gap-4"
+                >
+                  {bookingStatus === 'processing' ? <Loader2 className="animate-spin" size={20} /> : <Calendar size={20} />}
+                  Schedule Tour Node
+                </button>
+              </div>
+
+              <div className="pt-8 border-t border-gray-100 dark:border-white/5 space-y-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 rounded-2xl bg-gray-50 dark:bg-white/5 flex items-center justify-center text-[#8DC63F]">
+                    <ShieldCheck size={28} />
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Verified Asset</p>
+                    <p className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-tight">SMW Protocol Secured</p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>

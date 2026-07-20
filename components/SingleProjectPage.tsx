@@ -13,9 +13,10 @@ import { Project } from '../App';
 
 interface SingleProjectPageProps {
   project: Project;
+  onNavigate: (page: string) => void;
 }
 
-export const SingleProjectPage: React.FC<SingleProjectPageProps> = ({ project }) => {
+export const SingleProjectPage: React.FC<SingleProjectPageProps> = ({ project, onNavigate }) => {
   const [isSaved, setIsSaved] = useState(false);
   const [activeAccordion, setActiveAccordion] = useState<number | null>(0);
 
@@ -61,9 +62,9 @@ export const SingleProjectPage: React.FC<SingleProjectPageProps> = ({ project })
                 <div className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest ${
                   project.status === 'completed'
                     ? 'bg-green-500/10 border border-green-500/20 text-green-400'
-                    : 'bg-orange-500/10 border border-orange-500/20 text-orange-400'
+                    : 'bg-[#8DC63F]/10 border border-[#8DC63F]/20 text-[#8DC63F]'
                 }`}>
-                  <div className={`w-1.5 h-1.5 rounded-full ${project.status === 'completed' ? 'bg-green-500' : 'bg-orange-500 animate-pulse'}`}></div>
+                  <div className={`w-1.5 h-1.5 rounded-full ${project.status === 'completed' ? 'bg-green-500' : 'bg-[#8DC63F] animate-pulse'}`}></div>
                   {project.status}
                 </div>
               </div>
@@ -92,7 +93,7 @@ export const SingleProjectPage: React.FC<SingleProjectPageProps> = ({ project })
             animate={{ opacity: 1, scale: 1 }}
             className="lg:col-span-8 aspect-[16/9] rounded-[3rem] overflow-hidden border border-white/5 shadow-2xl group relative"
           >
-            <img src={project.image} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" alt="Main" />
+            <img src={project.image} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" alt="Main" referrerPolicy="no-referrer" />
             <div className="absolute inset-0 bg-gradient-to-t from-[#06080f] via-transparent to-transparent opacity-40"></div>
             <div className="absolute bottom-8 left-8 flex items-center gap-4">
               <div className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white">
@@ -111,7 +112,7 @@ export const SingleProjectPage: React.FC<SingleProjectPageProps> = ({ project })
                 transition={{ delay: 0.1 * (i + 1) }}
                 className="aspect-square lg:aspect-auto lg:h-[calc(50%-12px)] rounded-[2.5rem] overflow-hidden border border-white/5 group relative"
               >
-                <img src={img} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt={`Gallery ${i}`} />
+                <img src={img} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt={`Gallery ${i}`} referrerPolicy="no-referrer" />
                 <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors"></div>
               </motion.div>
             )) || (
@@ -199,7 +200,10 @@ export const SingleProjectPage: React.FC<SingleProjectPageProps> = ({ project })
               </div>
 
               <div className="mt-12 pt-12 border-t border-white/5">
-                <button className="w-full bg-[#8DC63F] text-black py-6 rounded-[2rem] font-black text-xs uppercase tracking-[0.4em] transition-all hover:bg-white flex items-center justify-center gap-4 shadow-2xl shadow-[#8DC63F]/10">
+                <button 
+                  onClick={() => onNavigate('contact')}
+                  className="w-full bg-[#8DC63F] text-black py-6 rounded-[2rem] font-black text-xs uppercase tracking-[0.4em] transition-all hover:bg-white flex items-center justify-center gap-4 shadow-2xl shadow-[#8DC63F]/10"
+                >
                   <ExternalLink size={18} /> Download Blueprints
                 </button>
               </div>
@@ -227,6 +231,7 @@ export const SingleProjectPage: React.FC<SingleProjectPageProps> = ({ project })
               src={project.image} 
               className="w-full h-full object-cover blur-sm group-hover:blur-none transition-all duration-700" 
               alt="Video Thumbnail" 
+              referrerPolicy="no-referrer"
             />
             {/* Standard YouTube Embed placeholder logic could go here */}
           </div>

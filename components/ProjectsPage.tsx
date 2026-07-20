@@ -141,6 +141,7 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({ projects, onProjectC
                       src={project.image} 
                       alt={project.title} 
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                      referrerPolicy="no-referrer"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-[#06080f] via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity"></div>
                     
@@ -149,9 +150,9 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({ projects, onProjectC
                       <div className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest flex items-center gap-2 shadow-lg ${
                         project.status === 'completed' 
                           ? 'bg-green-500 text-white' 
-                          : 'bg-orange-500 text-white'
+                          : 'bg-[#8DC63F] text-black'
                       }`}>
-                        <div className={`w-1.5 h-1.5 rounded-full bg-white ${project.status === 'completed' ? '' : 'animate-pulse'}`}></div>
+                        <div className={`w-1.5 h-1.5 rounded-full ${project.status === 'completed' ? 'bg-white' : 'bg-black animate-pulse'}`}></div>
                         {project.status === 'completed' ? 'Completed' : 'Ongoing'}
                       </div>
                     </div>

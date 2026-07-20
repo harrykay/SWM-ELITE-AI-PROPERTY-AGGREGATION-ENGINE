@@ -3,6 +3,8 @@ import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { MapPin, Bed, Bath, Maximize, Sparkles, ArrowRight } from 'lucide-react';
 import { Property, Currency, formatPrice } from '../App';
+import { GoogleGenAI } from "@google/genai";
+import { ImageCarousel } from './ImageCarousel';
 
 interface PropertyFeedProps {
   currency: Currency;
@@ -19,7 +21,25 @@ export const PropertyFeed: React.FC<PropertyFeedProps> = ({ currency, onProperty
         const response = await fetch('/api/properties/latest');
         if (response.ok) {
           const data = await response.json();
-          setProperties(data);
+          
+          const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+          
+          const propertiesWithSummaries = await Promise.all(
+            data.map(async (prop: Property) => {
+              try {
+                const aiResponse = await ai.models.generateContent({
+                  model: "gemini-3-flash-preview",
+                  contents: `Generate a concise summary (max 15 words) of the following property description: ${prop.description}`,
+                });
+                return { ...prop, aiSummary: aiResponse.text };
+              } catch (error) {
+                console.error('Error generating summary:', error);
+                return { ...prop, aiSummary: prop.description.substring(0, 100) + '...' };
+              }
+            })
+          );
+          
+          setProperties(propertiesWithSummaries);
         }
       } catch (err) {
         console.error('FETCH_LATEST_ERROR:', err);
@@ -79,19 +99,13 @@ export const PropertyFeed: React.FC<PropertyFeedProps> = ({ currency, onProperty
           >
             {/* Image Container */}
             <div className="relative h-64 overflow-hidden">
-              <img 
-                src={prop.images?.[0] || 'https://picsum.photos/seed/property/800/600'} 
-                alt={prop.title}
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                loading="lazy"
-                referrerPolicy="no-referrer"
-              />
-              <div className="absolute top-6 right-6 bg-black/60 backdrop-blur-md px-4 py-2 rounded-2xl border border-white/10">
+              <ImageCarousel images={prop.images || []} alt={prop.title} />
+              <div className="absolute top-6 right-6 bg-black/60 backdrop-blur-md px-4 py-2 rounded-2xl border border-white/10 z-30 pointer-events-none">
                 <span className="text-white font-black text-sm">
                   {formatPrice(prop.price, currency)}
                 </span>
               </div>
-              <div className="absolute bottom-6 left-6 bg-[#8DC63F] text-black px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest">
+              <div className="absolute bottom-6 left-6 bg-[#8DC63F] text-black px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest z-30 pointer-events-none">
                 {prop.type}
               </div>
             </div>

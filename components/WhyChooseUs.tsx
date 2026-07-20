@@ -48,9 +48,9 @@ export const WhyChooseUs: React.FC = () => {
       <div className="max-w-7xl mx-auto px-6">
         <div className="text-center mb-32">
           <h2 className="text-4xl md:text-5xl font-black text-gray-900 tracking-tighter">
-            Why <span className="text-[#FF5A3D]">SMW Platform</span> is the best choice for you?
+            Why <span className="text-[#8DC63F]">SMW Hub</span> is the best choice for you?
           </h2>
-          <div className="w-16 h-1.5 bg-[#FF5A3D] mx-auto rounded-full mt-6"></div>
+          <div className="w-16 h-1.5 bg-[#8DC63F] mx-auto rounded-full mt-6"></div>
         </div>
 
         <div className="relative flex flex-col lg:flex-row items-center justify-center gap-16 lg:gap-0">
@@ -65,14 +65,15 @@ export const WhyChooseUs: React.FC = () => {
           {/* Central Hub Connector */}
           <div className="relative lg:w-1/3 flex items-center justify-center">
              <div className="relative w-72 h-72">
-                <div className="absolute inset-0 bg-orange-100 rounded-full scale-150 opacity-20 animate-pulse"></div>
+                <div className="absolute inset-0 bg-[#8DC63F]/10 rounded-full scale-150 opacity-20 animate-pulse"></div>
                 <div className="absolute inset-0 bg-white rounded-[3rem] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.1)] border border-gray-100 flex flex-col items-center justify-center p-8 z-10 text-center">
                     <img 
                       src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=300&q=80" 
-                      className="w-24 h-24 rounded-full object-cover mb-4 border-4 border-[#FF5A3D]/20 shadow-xl" 
+                      className="w-24 h-24 rounded-full object-cover mb-4 border-4 border-[#8DC63F]/20 shadow-xl" 
                       alt="Hub"
+                      referrerPolicy="no-referrer"
                     />
-                    <p className="text-[10px] font-black uppercase text-gray-400 tracking-[0.3em] mb-1">Estate Hub</p>
+                    <p className="text-[10px] font-black uppercase text-gray-400 tracking-[0.3em] mb-1">SMW Hub</p>
                     <p className="text-xl font-black text-gray-900 tracking-tight leading-none uppercase">Central<br/>Intelligence</p>
                 </div>
 
@@ -107,7 +108,7 @@ const ReasonItem: React.FC<{ reason: any; align: 'left' | 'right' }> = ({ reason
     whileInView={{ opacity: 1, x: 0 }}
     className={`flex items-start gap-6 ${align === 'right' ? 'flex-row-reverse text-right' : ''}`}
   >
-    <div className="w-16 h-16 bg-gray-50 rounded-[1.5rem] flex items-center justify-center text-[#FF5A3D] shadow-sm border border-gray-100 group-hover:scale-110 transition-transform shrink-0">
+    <div className="w-16 h-16 bg-gray-50 rounded-[1.5rem] flex items-center justify-center text-[#8DC63F] shadow-sm border border-gray-100 group-hover:scale-110 transition-transform shrink-0">
       {reason.icon}
     </div>
     <div className="space-y-2">

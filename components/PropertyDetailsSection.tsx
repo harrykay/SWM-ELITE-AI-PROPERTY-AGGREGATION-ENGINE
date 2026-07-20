@@ -8,7 +8,7 @@ export const PropertyDetailsSection: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Property <span className="text-[#FF5A3D]">Details</span>
+            Property <span className="text-[#8DC63F]">Details</span>
           </h2>
           <p className="text-gray-600">With a detailed, responsive, and buyer-focused property presentation.</p>
         </div>
@@ -26,9 +26,9 @@ export const PropertyDetailsSection: React.FC = () => {
                 <span>Home</span>
                 <span>Listing</span>
                 <span>Investment</span>
-                <span className="text-[#FF5A3D]">What we do</span>
+                <span className="text-[#8DC63F]">What we do</span>
               </div>
-              <button className="bg-orange-500 text-white text-[10px] font-bold px-4 py-1.5 rounded-lg">Become a Seller</button>
+              <button className="bg-[#8DC63F] text-black text-[10px] font-bold px-4 py-1.5 rounded-lg">Become a Seller</button>
            </div>
 
            <div className="p-8">
@@ -36,7 +36,7 @@ export const PropertyDetailsSection: React.FC = () => {
                 <div className="rounded-2xl bg-gray-200 overflow-hidden relative">
                    <img src="https://picsum.photos/seed/house1/800/600" className="w-full h-full object-cover" alt="Main house" />
                    <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-[10px] font-bold flex items-center gap-1">
-                      <div className="w-2 h-2 bg-orange-500 rounded-full"></div> For Sale
+                      <div className="w-2 h-2 bg-[#8DC63F] rounded-full"></div> For Sale
                    </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
@@ -56,28 +56,28 @@ export const PropertyDetailsSection: React.FC = () => {
 
              <div className="mt-8 flex flex-col md:flex-row justify-between items-start gap-8">
                <div className="flex-1">
-                 <h3 className="text-2xl font-bold text-gray-900 mb-2">Luxury Looking Villa, London, UK</h3>
+                 <h3 className="text-2xl font-bold text-gray-900 mb-2">Luxury Looking Villa, Kololo, Kampala</h3>
                  <div className="flex items-center gap-2 text-gray-500 mb-4 text-sm">
-                   <MapPin size={16} /> 551 Joanne Lane, Wilmington, MA 01887
+                   <MapPin size={16} /> Plot 12, Acacia Avenue, Kololo, Kampala
                  </div>
                  <div className="flex items-baseline gap-2">
-                   <span className="text-2xl font-black text-[#FF5A3D]">$ 250,000</span>
+                   <span className="text-2xl font-black text-[#8DC63F]">Shs 950,000,000</span>
                    <span className="text-sm text-gray-400">Down Payment</span>
-                   <span className="text-sm font-bold text-gray-700">$20,254</span>
+                   <span className="text-sm font-bold text-gray-700">Shs 150,000,000</span>
                  </div>
                </div>
                
-               <div className="bg-orange-50 p-6 rounded-2xl w-full md:w-80 border border-orange-100">
+               <div className="bg-[#8DC63F]/10 p-6 rounded-2xl w-full md:w-80 border border-[#8DC63F]/20">
                   <h4 className="font-bold text-gray-900 mb-4">Start Your Purchase</h4>
                   <p className="text-xs text-gray-500 mb-4">Submit your full-price offer to begin the secure purchase process.</p>
                   <div className="space-y-3">
-                    <div className="bg-white p-3 rounded-xl border border-orange-100 flex justify-between text-xs font-semibold">
+                    <div className="bg-white p-3 rounded-xl border border-[#8DC63F]/10 flex justify-between text-xs font-semibold">
                       <span>Down Payment:</span>
-                      <span className="text-[#FF5A3D]">$15,000</span>
+                      <span className="text-[#8DC63F]">Shs 150M</span>
                     </div>
-                    <div className="bg-white p-3 rounded-xl border border-orange-100 flex justify-between text-xs font-semibold">
+                    <div className="bg-white p-3 rounded-xl border border-[#8DC63F]/10 flex justify-between text-xs font-semibold">
                       <span>Offer Price:</span>
-                      <span className="text-[#FF5A3D]">$250,000</span>
+                      <span className="text-[#8DC63F]">Shs 950M</span>
                     </div>
                   </div>
                </div>
@@ -87,26 +87,26 @@ export const PropertyDetailsSection: React.FC = () => {
 
         {/* Core Property Features with Wavy Line */}
         <div className="text-center mb-24">
-           <h2 className="text-3xl font-bold">Core Property <span className="text-[#FF5A3D]">Features</span></h2>
+           <h2 className="text-3xl font-bold">Core Property <span className="text-[#8DC63F]">Features</span></h2>
         </div>
 
         <div className="relative max-w-4xl mx-auto space-y-24">
           {/* Feature Connectors (Dashed SVG Paths) */}
-          <svg className="absolute top-10 left-0 w-full h-[120%] pointer-events-none opacity-20" viewBox="0 0 800 1200" fill="none" stroke="#FF5A3D" strokeWidth="2" strokeDasharray="8 8">
+          <svg className="absolute top-10 left-0 w-full h-[120%] pointer-events-none opacity-20" viewBox="0 0 800 1200" fill="none" stroke="#8DC63F" strokeWidth="2" strokeDasharray="8 8">
             <path d="M 100 0 Q 150 150 700 300 T 100 600 T 700 900" />
           </svg>
 
           {/* Feature Row 1 */}
           <div className="flex flex-col md:flex-row items-center gap-12">
             <div className="w-full md:w-1/2 flex justify-center">
-              <div className="w-48 h-48 bg-orange-100 rounded-full flex items-center justify-center p-8">
-                <div className="bg-white w-full h-full rounded-full shadow-lg flex items-center justify-center text-[#FF5A3D]">
+              <div className="w-48 h-48 bg-[#8DC63F]/10 rounded-full flex items-center justify-center p-8">
+                <div className="bg-white w-full h-full rounded-full shadow-lg flex items-center justify-center text-[#8DC63F]">
                   <Home size={64} />
                 </div>
               </div>
             </div>
             <div className="w-full md:w-1/2">
-              <h4 className="text-xl font-bold mb-4">Property <span className="text-[#FF5A3D]">Overview</span></h4>
+              <h4 className="text-xl font-bold mb-4">Property <span className="text-[#8DC63F]">Overview</span></h4>
               <ul className="space-y-2 text-gray-600">
                 <li className="flex items-center gap-2"><span>*</span> Price & property status</li>
                 <li className="flex items-center gap-2"><span>*</span> Title and location</li>
@@ -125,7 +125,7 @@ export const PropertyDetailsSection: React.FC = () => {
               </div>
             </div>
             <div className="w-full md:w-1/2 md:text-right">
-              <h4 className="text-xl font-bold mb-4">Key <span className="text-[#FF5A3D]">Details</span></h4>
+              <h4 className="text-xl font-bold mb-4">Key <span className="text-[#8DC63F]">Details</span></h4>
               <ul className="space-y-2 text-gray-600">
                 <li className="flex items-center md:justify-end gap-2"><span>*</span> Number of beds & baths</li>
                 <li className="flex items-center md:justify-end gap-2"><span>*</span> Property size (sqft)</li>
@@ -144,7 +144,7 @@ export const PropertyDetailsSection: React.FC = () => {
               </div>
             </div>
             <div className="w-full md:w-1/2">
-              <h4 className="text-xl font-bold mb-4">Buyer <span className="text-[#FF5A3D]">Actions</span></h4>
+              <h4 className="text-xl font-bold mb-4">Buyer <span className="text-[#8DC63F]">Actions</span></h4>
               <ul className="space-y-2 text-gray-600">
                 <li className="flex items-center gap-2"><span>*</span> Schedule tour</li>
                 <li className="flex items-center gap-2"><span>*</span> Contact agent</li>
@@ -156,14 +156,14 @@ export const PropertyDetailsSection: React.FC = () => {
           {/* Feature Row 4 (Reversed) */}
           <div className="flex flex-col md:flex-row-reverse items-center gap-12">
             <div className="w-full md:w-1/2 flex justify-center">
-              <div className="w-48 h-48 bg-orange-50 rounded-full flex items-center justify-center p-8">
-                <div className="bg-white w-full h-full rounded-full shadow-lg flex items-center justify-center text-orange-600">
+              <div className="w-48 h-48 bg-[#8DC63F]/10 rounded-full flex items-center justify-center p-8">
+                <div className="bg-white w-full h-full rounded-full shadow-lg flex items-center justify-center text-[#8DC63F]">
                   <Calculator size={64} />
                 </div>
               </div>
             </div>
             <div className="w-full md:w-1/2 md:text-right">
-              <h4 className="text-xl font-bold mb-4">Calculate <span className="text-[#FF5A3D]">Mortgage</span></h4>
+              <h4 className="text-xl font-bold mb-4">Calculate <span className="text-[#8DC63F]">Mortgage</span></h4>
               <ul className="space-y-2 text-gray-600">
                 <li className="flex items-center md:justify-end gap-2"><span>*</span> Monthly Payment</li>
                 <li className="flex items-center md:justify-end gap-2"><span>*</span> Affordability Check</li>
@@ -182,7 +182,7 @@ export const PropertyDetailsSection: React.FC = () => {
               </div>
             </div>
             <div className="w-full md:w-1/2">
-              <h4 className="text-xl font-bold mb-4">Interactive <span className="text-[#FF5A3D]">Map View</span></h4>
+              <h4 className="text-xl font-bold mb-4">Interactive <span className="text-[#8DC63F]">Map View</span></h4>
               <ul className="space-y-2 text-gray-600">
                 <li className="flex items-center gap-2"><span>*</span> Property location map</li>
                 <li className="flex items-center gap-2"><span>*</span> Nearby places</li>

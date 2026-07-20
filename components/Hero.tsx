@@ -6,9 +6,10 @@ import { Currency } from '../App';
 
 interface HeroProps {
   currency: Currency;
+  onNavigate: (page: string) => void;
 }
 
-export const Hero: React.FC<HeroProps> = ({ currency }) => {
+export const Hero: React.FC<HeroProps> = ({ currency, onNavigate }) => {
   const [activeTab, setActiveTab] = useState('Sales');
 
   const ugandanCities = [
@@ -37,6 +38,7 @@ export const Hero: React.FC<HeroProps> = ({ currency }) => {
           src="https://images.unsplash.com/photo-1613490493576-7fde63acd811?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80" 
           className="w-full h-full object-cover" 
           alt="Luxury Architecture" 
+          referrerPolicy="no-referrer"
         />
         <div className="absolute inset-0 hero-overlay"></div>
       </div>
@@ -99,7 +101,7 @@ export const Hero: React.FC<HeroProps> = ({ currency }) => {
             <FilterOption label={`Asset Valuation (${currency})`} options={priceOptions} />
           </div>
           <button 
-            onClick={() => window.location.href = '/properties'}
+            onClick={() => onNavigate('properties')}
             className="w-full lg:w-auto bg-gray-900 text-white px-8 md:px-12 py-4 md:py-5 rounded-xl md:rounded-2xl font-black uppercase text-[10px] md:text-[11px] tracking-[0.2em] md:tracking-[0.3em] flex items-center justify-center gap-3 md:gap-4 hover:bg-[#8DC63F] hover:text-black transition-all shadow-xl shadow-gray-200"
           >
             <Search size={18} /> Search Assets

@@ -3,7 +3,11 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Star, Check, Play, ArrowRight } from 'lucide-react';
 
-export const WhoWeAre: React.FC = () => {
+interface WhoWeAreProps {
+  onNavigate: (page: string) => void;
+}
+
+export const WhoWeAre: React.FC<WhoWeAreProps> = ({ onNavigate }) => {
   return (
     <section className="py-24 bg-white relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-6 md:px-10 flex flex-col lg:flex-row gap-20 items-center">
@@ -17,7 +21,7 @@ export const WhoWeAre: React.FC = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 className="rounded-[2.5rem] overflow-hidden shadow-2xl h-80"
               >
-                <img src="https://nellions.co.ug/wp-content/uploads/2020/12/realtors.jp" alt="Modern House" className="w-full h-full object-cover" />
+                <img src="https://images.unsplash.com/photo-1582407947304-fd86f028f716?auto=format&fit=crop&w=800&q=80" alt="Modern House" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
               </motion.div>
               <motion.div 
                 initial={{ opacity: 0, y: 20 }}
@@ -25,7 +29,7 @@ export const WhoWeAre: React.FC = () => {
                 transition={{ delay: 0.2 }}
                 className="rounded-[2.5rem] overflow-hidden shadow-2xl h-48"
               >
-                <img src="https://images.unsplash.com/photo-1600607687940-c52af0a09a0f?auto=format&fit=crop&w=600&q=80" alt="House Detail" className="w-full h-full object-cover" />
+                <img src="https://images.unsplash.com/photo-1600607687940-c52af0a09a0f?auto=format&fit=crop&w=600&q=80" alt="House Detail" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
               </motion.div>
             </div>
             <div className="space-y-4 pt-12">
@@ -35,7 +39,7 @@ export const WhoWeAre: React.FC = () => {
                 transition={{ delay: 0.1 }}
                 className="rounded-[2.5rem] overflow-hidden shadow-2xl h-96 relative group"
               >
-                <img src="https://images.unsplash.com/photo-1600566753190-17f0bb2a6c3e?auto=format&fit=crop&w=600&q=80" alt="Luxury Interior" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                <img src="https://images.unsplash.com/photo-1600566753190-17f0bb2a6c3e?auto=format&fit=crop&w=600&q=80" alt="Luxury Interior" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" referrerPolicy="no-referrer" />
                 {/* Play Button Overlay */}
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="w-16 h-16 bg-white/30 backdrop-blur-md rounded-full flex items-center justify-center text-white cursor-pointer hover:bg-white/50 transition-colors">
@@ -64,7 +68,7 @@ export const WhoWeAre: React.FC = () => {
 
         {/* Right: Content */}
         <div className="w-full lg:w-1/2">
-          <div className="inline-block bg-orange-50 px-4 py-1.5 rounded-full text-[11px] font-black text-[#8DC63F] uppercase tracking-[0.2em] mb-6">
+          <div className="inline-block bg-[#8DC63F]/10 px-4 py-1.5 rounded-full text-[11px] font-black text-[#8DC63F] uppercase tracking-[0.2em] mb-6">
             Who We Are
           </div>
           <h2 className="text-4xl md:text-5xl font-black text-gray-900 leading-tight mb-8 tracking-tighter">
@@ -81,7 +85,7 @@ export const WhoWeAre: React.FC = () => {
               "Dedicated support for diaspora clients"
             ].map((item, i) => (
               <div key={i} className="flex items-center gap-4 text-gray-700 font-bold group">
-                <div className="w-6 h-6 rounded-full bg-orange-50 flex items-center justify-center text-[#8DC63F] group-hover:bg-[#8DC63F] group-hover:text-white transition-colors">
+                <div className="w-6 h-6 rounded-full bg-[#8DC63F]/10 flex items-center justify-center text-[#8DC63F] group-hover:bg-[#8DC63F] group-hover:text-white transition-colors">
                   <Check size={14} strokeWidth={3} />
                 </div>
                 <span>{item}</span>
@@ -89,7 +93,10 @@ export const WhoWeAre: React.FC = () => {
             ))}
           </div>
 
-          <button className="group flex items-center gap-3 bg-gray-900 text-white px-10 py-5 rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-2xl shadow-gray-200 hover:bg-[#8DC63F] transition-all">
+          <button 
+            onClick={() => onNavigate('about')}
+            className="group flex items-center gap-3 bg-gray-900 text-white px-10 py-5 rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-2xl shadow-gray-200 hover:bg-[#8DC63F] transition-all"
+          >
             More About Us <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
           </button>
         </div>

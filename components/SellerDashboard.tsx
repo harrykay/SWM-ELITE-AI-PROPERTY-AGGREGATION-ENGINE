@@ -30,14 +30,14 @@ export const SellerDashboard: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4">
         <div className="text-center mb-20">
           <h2 className="text-4xl font-bold mb-4">
-            Easy to <span className="text-[#FF5A3D]">Sell</span>
+            Easy to <span className="text-[#8DC63F]">Sell</span>
           </h2>
           <p className="text-gray-600">Designed to simplify selling, boost visibility, and speed up conversions.</p>
         </div>
 
         <div className="relative max-w-5xl mx-auto mb-20">
           <div className="bg-gray-900 rounded-3xl shadow-2xl overflow-hidden transform rotate-2 hover:rotate-0 transition-transform duration-700">
-            <img src="https://picsum.photos/seed/dash2/1200/600" className="w-full opacity-90" alt="Seller Dashboard" />
+            <img src="https://picsum.photos/seed/dash2/1200/600" className="w-full opacity-90" alt="Seller Dashboard" referrerPolicy="no-referrer" />
           </div>
         </div>
 
@@ -46,7 +46,7 @@ export const SellerDashboard: React.FC = () => {
             title="Overview"
             icon={<LayoutDashboard />}
             features={["Premium Flow", "Live Graph & Charts", "All Overview"]}
-            color="text-orange-500"
+            color="text-[#8DC63F]"
           />
           <SellerCard
             title="Listing"
@@ -58,13 +58,13 @@ export const SellerDashboard: React.FC = () => {
             title="Manage Investments"
             icon={<TrendingUp />}
             features={["My Projects", "Create Project", "Wallet", "Live Reports"]}
-            color="text-orange-600"
+            color="text-[#8DC63F]"
           />
           <SellerCard
             title="Manage Appointments"
             icon={<Calendar />}
             features={["Filter (Pending Confirmed & Cancelled)", "Confirm Appointment", "Cancel Appointment"]}
-            color="text-orange-400"
+            color="text-[#8DC63F]"
           />
         </div>
       </div>

@@ -21,12 +21,16 @@ const services = [
   }
 ];
 
-export const ServicesGrid: React.FC = () => {
+interface ServicesGridProps {
+  onNavigate: (page: string) => void;
+}
+
+export const ServicesGrid: React.FC<ServicesGridProps> = ({ onNavigate }) => {
   return (
     <section className="py-24 bg-gray-50">
       <div className="max-w-7xl mx-auto px-6 md:px-10">
         <div className="text-center mb-20">
-          <div className="inline-block border border-orange-200 px-4 py-1.5 rounded-full text-[10px] font-black text-orange-400 uppercase tracking-[0.2em] mb-4">
+          <div className="inline-block border border-[#8DC63F]/20 px-4 py-1.5 rounded-full text-[10px] font-black text-[#8DC63F] uppercase tracking-[0.2em] mb-4">
             Our Services
           </div>
           <h2 className="text-4xl md:text-5xl font-black text-gray-900 tracking-tighter">Best Quality Services</h2>
@@ -46,13 +50,16 @@ export const ServicesGrid: React.FC = () => {
                 <h3 className="text-xl font-black text-gray-900 leading-tight max-w-[150px]">
                   {service.title}
                 </h3>
-                <div className="w-12 h-12 rounded-full border border-gray-100 flex items-center justify-center text-gray-400 group-hover:bg-gray-900 group-hover:text-white transition-all cursor-pointer">
+                <div 
+                  onClick={() => onNavigate('services')}
+                  className="w-12 h-12 rounded-full border border-gray-100 flex items-center justify-center text-gray-400 group-hover:bg-gray-900 group-hover:text-white transition-all cursor-pointer"
+                >
                   <ArrowUpRight size={24} />
                 </div>
               </div>
               
               <div className="relative aspect-[1.2/1] rounded-[1.5rem] overflow-hidden">
-                <img src={service.image} alt={service.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                <img src={service.image} alt={service.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" referrerPolicy="no-referrer" />
                 <div className="absolute inset-x-4 bottom-4 bg-white/90 backdrop-blur-md p-5 rounded-2xl shadow-xl border border-white/20">
                   <p className="text-xs text-gray-600 font-medium leading-relaxed">
                     {service.desc}
@@ -64,7 +71,10 @@ export const ServicesGrid: React.FC = () => {
         </div>
 
         <div className="text-center mt-16">
-          <button className="bg-orange-400/10 text-orange-400 px-10 py-4 rounded-full font-black text-[11px] uppercase tracking-widest hover:bg-orange-400 hover:text-white transition-all">
+          <button 
+            onClick={() => onNavigate('services')}
+            className="bg-[#8DC63F]/10 text-[#8DC63F] px-10 py-4 rounded-full font-black text-[11px] uppercase tracking-widest hover:bg-[#8DC63F] hover:text-white transition-all"
+          >
             View All Services →
           </button>
         </div>

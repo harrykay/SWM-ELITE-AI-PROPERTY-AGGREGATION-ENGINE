@@ -10,6 +10,7 @@ import { Service } from '../App';
 
 interface ServicesPageProps {
   services: Service[];
+  onNavigate: (page: string) => void;
 }
 
 const iconMap: Record<string, React.ReactNode> = {
@@ -23,7 +24,7 @@ const iconMap: Record<string, React.ReactNode> = {
   'Decorations': <Sparkles size={32} />,
 };
 
-export const ServicesPage: React.FC<ServicesPageProps> = ({ services }) => {
+export const ServicesPage: React.FC<ServicesPageProps> = ({ services, onNavigate }) => {
   return (
     <div className="pt-36 md:pt-52 pb-24 bg-gray-50 dark:bg-[#06080f] min-h-screen transition-colors duration-500">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -79,7 +80,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({ services }) => {
               </div>
 
               <button 
-                onClick={() => window.location.href = '/contact'}
+                onClick={() => onNavigate('contact')}
                 className="mt-10 w-full py-4 border border-gray-100 dark:border-white/10 rounded-2xl text-[9px] md:text-[10px] font-black uppercase tracking-widest text-gray-400 group-hover:bg-gray-900 dark:group-hover:bg-white group-hover:text-white dark:group-hover:text-black transition-all"
               >
                 Initialize Consultation Node
@@ -102,13 +103,13 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({ services }) => {
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4 md:gap-8">
               <button 
-                onClick={() => window.location.href = '/contact'}
+                onClick={() => onNavigate('contact')}
                 className="bg-[#8DC63F] text-black px-10 md:px-16 py-4 md:py-6 rounded-2xl font-black uppercase text-[10px] md:text-xs tracking-[0.3em] hover:scale-105 transition-transform shadow-2xl shadow-[#8DC63F]/20"
               >
                 Get a Quote
               </button>
               <button 
-                onClick={() => window.location.href = '/projects'}
+                onClick={() => onNavigate('projects')}
                 className="bg-white/5 border border-white/10 text-white px-10 md:px-16 py-4 md:py-6 rounded-2xl font-black uppercase text-[10px] md:text-xs tracking-[0.3em] hover:bg-white/10 transition-all"
               >
                 View Project Node

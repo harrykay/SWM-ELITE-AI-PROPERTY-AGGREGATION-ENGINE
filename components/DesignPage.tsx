@@ -2,7 +2,11 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { DraftingCompass, Sparkles, Leaf, Layout, TrendingUp, ArrowRight } from 'lucide-react';
 
-export const DesignPage: React.FC = () => {
+interface DesignPageProps {
+  onNavigate: (page: string) => void;
+}
+
+export const DesignPage: React.FC<DesignPageProps> = ({ onNavigate }) => {
   return (
     <div className="pt-36 md:pt-52 pb-24 bg-gray-50 dark:bg-[#06080f] min-h-screen transition-colors duration-500">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -24,7 +28,10 @@ export const DesignPage: React.FC = () => {
               Discover innovative architectural design by SMW. We create luxury, functional, and sustainable spaces that enhance lifestyle, maximize property value, and inspire modern living.
             </p>
             <div className="pt-4">
-              <button className="bg-[#8DC63F] text-black px-10 py-5 rounded-2xl font-black uppercase text-xs tracking-[0.2em] hover:scale-105 transition-transform shadow-2xl shadow-[#8DC63F]/20 flex items-center gap-3">
+              <button 
+                onClick={() => onNavigate('projects')}
+                className="bg-[#8DC63F] text-black px-10 py-5 rounded-2xl font-black uppercase text-xs tracking-[0.2em] hover:scale-105 transition-transform shadow-2xl shadow-[#8DC63F]/20 flex items-center gap-3"
+              >
                 View Portfolio <ArrowRight size={18} />
               </button>
             </div>
@@ -100,7 +107,10 @@ export const DesignPage: React.FC = () => {
           <p className="text-lg text-gray-600 dark:text-gray-400 mb-10 leading-relaxed">
             Every project is tailored to enhance comfort, prestige, and usability — ensuring your property is not only visually impressive but also commercially and practically sound. We design spaces people aspire to live, work, and invest in.
           </p>
-          <button className="bg-gray-900 dark:bg-white text-white dark:text-black px-12 py-5 rounded-2xl font-black uppercase text-xs tracking-[0.2em] hover:bg-[#8DC63F] hover:text-black transition-all shadow-xl">
+          <button 
+            onClick={() => onNavigate('contact')}
+            className="bg-gray-900 dark:bg-white text-white dark:text-black px-12 py-5 rounded-2xl font-black uppercase text-xs tracking-[0.2em] hover:bg-[#8DC63F] hover:text-black transition-all shadow-xl"
+          >
             Discuss Your Project
           </button>
         </motion.div>

@@ -4,8 +4,14 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import bcrypt from 'bcrypt';
 import session from 'express-session';
+import fs from 'fs';
+import path from 'path';
 
-dotenv.config();
+if (fs.existsSync('.env.local')) {
+  dotenv.config({ path: '.env.local' });
+} else {
+  dotenv.config();
+}
 
 const { Pool } = pg;
 
@@ -40,12 +46,53 @@ declare module 'express-session' {
   }
 }
 
-// PostgreSQL Connection
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL || 'postgres://postgres:f6vTwdfWoS0tvuXY9g5t7ZiZaKBBEqp2wz15muYcNKZEhni8ICzM9OGGY3N9nAPM@173.249.14.116:5432/postgres',
-  ssl: false,
-  connectionTimeoutMillis: 5000,
-});
+// PostgreSQL Connection parsing
+const dbUrl = process.env.DATABASE_URL || 'postgres://postgres:f6vTwdfWoS0tvuXY9g5t7ZiZaKBBEqp2wz15muYcNKZEhni8ICzM9OGGY3N9nAPM@173.249.14.116:5432/postgres';
+let poolConfig: any = {};
+
+if (dbUrl.includes(';')) {
+  console.log('--- Semicolon-separated DATABASE_URL detected ---');
+  const parts = dbUrl.split(';').map(p => p.trim()).filter(Boolean);
+  let host = '';
+  let port = 5432;
+  let database = '';
+  let user = '';
+  let password = '';
+
+  parts.forEach((part, index) => {
+    if (index === 0 && !part.includes('=')) {
+      host = part;
+    } else {
+      const [key, value] = part.split('=');
+      if (key && value) {
+        const lowerKey = key.toLowerCase();
+        if (lowerKey === 'port') port = parseInt(value, 10);
+        else if (lowerKey === 'database') database = value;
+        else if (lowerKey === 'username' || lowerKey === 'user') user = value;
+        else if (lowerKey === 'password') password = value;
+        else if (lowerKey === 'host') host = value;
+      }
+    }
+  });
+
+  poolConfig = {
+    host,
+    port,
+    database,
+    user,
+    password,
+    ssl: false,
+    connectionTimeoutMillis: 5000,
+  };
+} else {
+  poolConfig = {
+    connectionString: dbUrl,
+    ssl: false,
+    connectionTimeoutMillis: 5000,
+  };
+}
+
+const pool = new Pool(poolConfig);
 
 // Initialize Database
 const initDb = async () => {

@@ -25,7 +25,11 @@ const Logo: React.FC<{ variant?: 'light' | 'dark' }> = ({ variant = 'light' }) =
   </div>
 );
 
-export const Footer: React.FC = () => {
+interface FooterProps {
+  onNavigate: (page: string) => void;
+}
+
+export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
   return (
     <footer className="bg-[#0a0c16] text-white pt-24 pb-12 border-t border-white/5 relative overflow-hidden transition-colors duration-300">
       {/* Dynamic Background Accents */}
@@ -57,15 +61,18 @@ export const Footer: React.FC = () => {
             </h4>
             <ul className="space-y-6">
               {[
-                { label: 'Asset Search', icon: <ChevronRight size={14} /> },
-                { label: 'Global Properties', icon: <ChevronRight size={14} /> },
-                { label: 'Investment Portal', icon: <ChevronRight size={14} /> },
-                { label: 'Our Services', icon: <ChevronRight size={14} /> },
-                { label: 'About History', icon: <ChevronRight size={14} /> },
-                { label: 'Contact Hub', icon: <ChevronRight size={14} /> }
+                { label: 'Asset Search', icon: <ChevronRight size={14} />, page: 'properties' },
+                { label: 'Global Properties', icon: <ChevronRight size={14} />, page: 'properties' },
+                { label: 'Investment Portal', icon: <ChevronRight size={14} />, page: 'projects' },
+                { label: 'Our Services', icon: <ChevronRight size={14} />, page: 'services' },
+                { label: 'About History', icon: <ChevronRight size={14} />, page: 'about' },
+                { label: 'Contact Hub', icon: <ChevronRight size={14} />, page: 'contact' }
               ].map((link) => (
                 <li key={link.label}>
-                  <button className="text-gray-400 hover:text-[#8DC63F] text-sm font-bold transition-all hover:translate-x-1 flex items-center gap-3 group">
+                  <button 
+                    onClick={() => onNavigate(link.page)}
+                    className="text-gray-400 hover:text-[#8DC63F] text-sm font-bold transition-all hover:translate-x-1 flex items-center gap-3 group"
+                  >
                     <span className="text-white/5 group-hover:text-[#8DC63F] transition-colors">{link.icon}</span>
                     {link.label}
                   </button>

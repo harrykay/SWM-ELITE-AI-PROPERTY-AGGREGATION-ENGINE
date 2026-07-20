@@ -290,7 +290,19 @@ const App: React.FC = () => {
   const [user, setUser] = useState<any>(null);
   const [auth, setAuth] = useState<{ user: UserProfile } | null>(null);
   const [currency, setCurrency] = useState<Currency>('UGX');
-  const [isDarkMode, setIsDarkMode] = useState(true);
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    const saved = localStorage.getItem('theme');
+    return saved ? saved === 'dark' : true;
+  });
+
+  useEffect(() => {
+    localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [isDarkMode]);
   const [cmsSettings, setCmsSettings] = useState<any>({});
   const [cmsPages, setCmsPages] = useState<any[]>([]);
 
@@ -429,7 +441,7 @@ const App: React.FC = () => {
 
   return (
     <GlobalErrorBoundary>
-      <div className={`min-h-screen transition-colors duration-500 ${isDarkMode ? 'bg-[#06080f] text-gray-100' : 'bg-white text-gray-900'}`} style={{ fontFamily: settings.fontFamily }}>
+      <div className={`min-h-screen transition-colors duration-500 ${isDarkMode ? 'dark bg-[#06080f] text-gray-100' : 'bg-white text-gray-900'}`} style={{ fontFamily: settings.fontFamily }}>
         
         {!isDashboard && (
           <div className="fixed top-0 left-0 right-0 z-50">
@@ -450,11 +462,13 @@ const App: React.FC = () => {
         <main className={!isDashboard ? "pt-0" : ""}>
           {currentPage === 'home' && (
             <div className="animate-in fade-in duration-1000">
-              <Hero currency={currency} />
-              {cmsSettings.showEcosystem !== false && <EcosystemGrid />}
-              {cmsSettings.showWhoWeAre !== false && <WhoWeAre />}
+              <Hero currency={currency} onNavigate={handleNavigate} />
+              {cmsSettings.showEcosystem !== false && <EcosystemGrid onNavigate={handleNavigate} />}
+              {cmsSettings.showWhoWeAre !== false && <WhoWeAre onNavigate={handleNavigate} />}
               <PartnerLogos />
-              {cmsSettings.showFeatured !== false && <FeaturedProperties currency={currency} />}
+              {cmsSettings.showServices !== false && <ServicesGrid onNavigate={handleNavigate} />}
+              {cmsSettings.showFeatured !== false && <FeaturedProperties currency={currency} onNavigate={handleNavigate} />}
+              {cmsSettings.showShowcase !== false && <PropertyShowcase currency={currency} onNavigate={handleNavigate} />}
               {cmsSettings.showLatestProjects !== false && (
                 <LatestProjects 
                   projects={projects} 
@@ -464,8 +478,8 @@ const App: React.FC = () => {
               )}
               <PropertyFeed currency={currency} onPropertyClick={(id) => handleNavigate('single-property', { id })} />
               {cmsSettings.showTestimonials !== false && <Testimonials />}
-              {cmsSettings.showFAQ !== false && <FAQ />}
-              <CTA />
+              {cmsSettings.showFAQ !== false && <FAQ onNavigate={handleNavigate} />}
+              <CTA onNavigate={handleNavigate} />
             </div>
           )}
           {currentPage === 'properties' && <PropertiesPage properties={properties} onPropertyClick={(id) => handleNavigate('single-property', { id })} currency={currency} />}
@@ -481,13 +495,16 @@ const App: React.FC = () => {
           )}
           {currentPage === 'contact' && <ContactPage />}
           {currentPage === 'services' && (
-            <ServicesPage services={[
-              { id: '1', title: 'Construction', description: 'High-quality building services.', details: ['Residential', 'Commercial'] },
-              { id: '2', title: 'Design', description: 'Architectural design and planning.', details: ['3D Modeling', 'Blueprints'] }
-            ]} />
+            <ServicesPage 
+              onNavigate={handleNavigate}
+              services={[
+                { id: '1', title: 'Construction', description: 'High-quality building services.', details: ['Residential', 'Commercial'] },
+                { id: '2', title: 'Design', description: 'Architectural design and planning.', details: ['3D Modeling', 'Blueprints'] }
+              ]} 
+            />
           )}
-          {currentPage === 'land-processing' && <LandProcessingPage />}
-          {currentPage === 'design' && <DesignPage />}
+          {currentPage === 'land-processing' && <LandProcessingPage onNavigate={handleNavigate} />}
+          {currentPage === 'design' && <DesignPage onNavigate={handleNavigate} />}
           {currentPage === 'add-listing' && (
             <AddListingPage 
               userRole={auth?.user?.role || 'agent'} 
@@ -521,14 +538,21 @@ const App: React.FC = () => {
           )}
           {currentPage === 'single-project' && (
             projects.length > 0 ? (
-              <SingleProjectPage project={projects.find(p => p.id === selectedProjectId) || projects[0]} />
+              <SingleProjectPage 
+                project={projects.find(p => p.id === selectedProjectId) || projects[0]} 
+                onNavigate={handleNavigate}
+              />
             ) : (
               <div className="pt-40 text-center text-gray-500 font-black uppercase tracking-widest">Project Node Not Found</div>
             )
           )}
           {currentPage === 'single-property' && (
             properties.length > 0 ? (
-              <SinglePropertyPage property={properties.find(p => p.id === selectedPropertyId) || properties[0]} currency={currency} />
+              <SinglePropertyPage 
+                property={properties.find(p => p.id === selectedPropertyId) || properties[0]} 
+                currency={currency} 
+                onNavigate={handleNavigate}
+              />
             ) : (
               <div className="pt-40 text-center text-gray-500 font-black uppercase tracking-widest">Asset Node Not Found</div>
             )
@@ -539,7 +563,7 @@ const App: React.FC = () => {
           )}
         </main>
 
-        {!isDashboard && <Footer />}
+        {!isDashboard && <Footer onNavigate={handleNavigate} />}
         <VoiceAssistant />
       </div>
     </GlobalErrorBoundary>

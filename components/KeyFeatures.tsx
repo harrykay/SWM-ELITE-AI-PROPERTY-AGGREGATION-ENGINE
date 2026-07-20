@@ -27,15 +27,15 @@ export const KeyFeatures: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4">
         <div className="text-center mb-16">
           <h2 className="text-3xl font-bold mb-4">
-            Key <span className="text-[#FF5A3D]">Features</span>
+            Key <span className="text-[#8DC63F]">Features</span>
           </h2>
-          <div className="w-24 h-1 bg-[#FF5A3D] mx-auto rounded-full"></div>
+          <div className="w-24 h-1 bg-[#8DC63F] mx-auto rounded-full"></div>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-y-12 gap-x-8">
           {features.map((f, i) => (
             <div key={i} className="flex flex-col items-center text-center group cursor-pointer">
-              <div className="w-14 h-14 bg-orange-50 text-[#FF5A3D] rounded-xl flex items-center justify-center mb-4 group-hover:bg-[#FF5A3D] group-hover:text-white transition-all duration-300">
+              <div className="w-14 h-14 bg-[#8DC63F]/10 text-[#8DC63F] rounded-xl flex items-center justify-center mb-4 group-hover:bg-[#8DC63F] group-hover:text-black transition-all duration-300">
                 {/* Fix: Cast f.icon to any to allow passing size prop in cloneElement */}
                 {React.cloneElement(f.icon as React.ReactElement<any>, { size: 24 })}
               </div>

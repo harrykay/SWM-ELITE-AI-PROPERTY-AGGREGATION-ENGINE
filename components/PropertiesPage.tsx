@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { Property, Currency, formatPrice, UGX_RATE } from '../App';
 import { GoogleGenAI, Type } from "@google/genai";
+import { ImageCarousel } from './ImageCarousel';
 
 interface PropertiesPageProps {
   properties: Property[];
@@ -248,7 +249,7 @@ export const PropertiesPage: React.FC<PropertiesPageProps> = ({
                       </div>
                     </div>
                     <div className="aspect-[1.8/1] overflow-hidden">
-                      <img src={match.images[0]} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all duration-700" alt={match.title} />
+                      <ImageCarousel images={match.images || []} alt={match.title} />
                     </div>
                     <div className="p-6">
                       <div className="flex items-center gap-2 text-[8px] font-black uppercase tracking-widest text-gray-500 mb-2">
@@ -326,15 +327,15 @@ export const PropertiesPage: React.FC<PropertiesPageProps> = ({
                 className="bg-white dark:bg-[#161925] rounded-[2rem] md:rounded-[3rem] overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-700 group border border-gray-100 dark:border-white/5 flex flex-col h-full cursor-pointer"
               >
                 <div className="relative aspect-[1.3/1] overflow-hidden shrink-0">
-                  <img src={property.images[0]} alt={property.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[2.5s] ease-out" loading="lazy" />
-                  <div className="absolute top-4 left-4 md:top-6 md:left-6 flex flex-col gap-2">
+                  <ImageCarousel images={property.images || []} alt={property.title} />
+                  <div className="absolute top-4 left-4 md:top-6 md:left-6 flex flex-col gap-2 pointer-events-none z-30">
                     {property.isFeatured && (
                       <span className="bg-[#FF5A3D] text-white text-[9px] md:text-[10px] font-black uppercase px-4 py-2 rounded-xl shadow-2xl tracking-[0.2em] flex items-center gap-2 border border-white/10">
                         <Sparkles size={12} fill="currentColor" /> Featured
                       </span>
                     )}
                   </div>
-                  <div className="absolute top-4 right-4 md:top-6 md:right-6">
+                  <div className="absolute top-4 right-4 md:top-6 md:right-6 pointer-events-none z-30">
                     <span className={`text-white text-[9px] font-black uppercase px-3 py-1.5 rounded-lg shadow-xl tracking-widest flex items-center gap-1.5 ${statusStyle.color}`}>
                       {statusStyle.icon}
                       {property.status}
@@ -342,14 +343,14 @@ export const PropertiesPage: React.FC<PropertiesPageProps> = ({
                   </div>
                   
                   {/* Overlay Interaction */}
-                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 bg-black/30 backdrop-blur-[3px]">
-                     <button onClick={(e) => handleToggleCompare(e, property.id)} className={`w-14 h-14 md:w-16 md:h-16 rounded-[1.5rem] flex flex-col items-center justify-center shadow-2xl transform translate-y-6 group-hover:translate-y-0 transition-all duration-500 ${isCompared ? 'bg-[#8DC63F] text-black scale-110' : 'bg-white text-gray-900 hover:bg-[#8DC63F] hover:text-white'}`}>
+                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 bg-black/30 backdrop-blur-[3px] pointer-events-none z-20">
+                     <button onClick={(e) => handleToggleCompare(e, property.id)} className={`w-14 h-14 md:w-16 md:h-16 rounded-[1.5rem] flex flex-col items-center justify-center shadow-2xl transform translate-y-6 group-hover:translate-y-0 transition-all duration-500 pointer-events-auto ${isCompared ? 'bg-[#8DC63F] text-black scale-110' : 'bg-white text-gray-900 hover:bg-[#8DC63F] hover:text-white'}`}>
                        <Repeat size={24} className={isCompared ? 'animate-pulse' : ''} />
                        <span className="text-[8px] font-black uppercase tracking-widest mt-1 hidden md:block">{isCompared ? 'Remove' : 'Compare'}</span>
                      </button>
                   </div>
 
-                  <div className="absolute bottom-0 left-0 w-full p-5 md:p-8 bg-gradient-to-t from-black/90 via-black/40 to-transparent flex justify-between items-end">
+                  <div className="absolute bottom-0 left-0 w-full p-5 md:p-8 bg-gradient-to-t from-black/90 via-black/40 to-transparent flex justify-between items-end pointer-events-none z-30">
                     <div className="flex items-center gap-2.5 text-white text-[11px] md:text-[14px] font-black uppercase tracking-widest">
                       <MapPin size={16} className="text-[#8DC63F]" />
                       <span className="truncate max-w-[180px] md:max-w-none">{property.location}</span>

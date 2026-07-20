@@ -50,6 +50,7 @@ export const LatestProjects: React.FC<LatestProjectsProps> = ({ projects, onProj
                   src={project.image} 
                   alt={project.title} 
                   className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" 
+                  referrerPolicy="no-referrer"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-60 group-hover:opacity-40 transition-opacity"></div>
                 
@@ -57,7 +58,7 @@ export const LatestProjects: React.FC<LatestProjectsProps> = ({ projects, onProj
                   <div className={`px-4 py-2 rounded-xl backdrop-blur-md border text-[8px] font-black uppercase tracking-widest ${
                     project.status === 'completed' 
                       ? 'bg-green-500/20 border-green-500/30 text-green-400' 
-                      : 'bg-orange-500/20 border-orange-500/30 text-orange-400'
+                      : 'bg-[#8DC63F]/20 border-[#8DC63F]/30 text-[#8DC63F]'
                   }`}>
                     {project.status}
                   </div>

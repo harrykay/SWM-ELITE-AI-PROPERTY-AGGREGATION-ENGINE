@@ -8,8 +8,8 @@ const features = [
     title: 'Property Overview', 
     icon: <Home size={32} />, 
     details: ['Price & property status', 'Title and location', 'High-quality visual preview'],
-    color: '#FF5A3D',
-    bgColor: 'bg-orange-50'
+    color: '#8DC63F',
+    bgColor: 'bg-[#8DC63F]/10'
   },
   { 
     title: 'Key Details', 
@@ -49,14 +49,14 @@ export const CoreFeaturesFlow: React.FC = () => {
       <div className="max-w-7xl mx-auto px-6">
         <div className="text-center mb-32">
           <h2 className="text-4xl md:text-5xl font-black text-gray-900 tracking-tighter">
-            Core Property <span className="text-[#FF5A3D]">Features</span>
+            Core Property <span className="text-[#8DC63F]">Features</span>
           </h2>
-          <div className="w-16 h-1.5 bg-[#FF5A3D] mx-auto rounded-full mt-6"></div>
+          <div className="w-16 h-1.5 bg-[#8DC63F] mx-auto rounded-full mt-6"></div>
         </div>
 
         <div className="relative max-w-5xl mx-auto">
           {/* Custom SVG Wavy Path Connector */}
-          <svg className="absolute top-10 left-0 w-full h-[120%] pointer-events-none opacity-20 hidden md:block" viewBox="0 0 800 1200" fill="none" stroke="#FF5A3D" strokeWidth="2.5" strokeDasharray="12 12">
+          <svg className="absolute top-10 left-0 w-full h-[120%] pointer-events-none opacity-20 hidden md:block" viewBox="0 0 800 1200" fill="none" stroke="#8DC63F" strokeWidth="2.5" strokeDasharray="12 12">
             <path d="M 100 0 Q 150 150 700 300 T 100 600 T 700 900 T 100 1200" />
           </svg>
 
@@ -80,9 +80,9 @@ export const CoreFeaturesFlow: React.FC = () => {
                   <ul className={`space-y-4 ${feature.reverse ? 'flex flex-col items-end' : ''}`}>
                     {feature.details.map((detail, idx) => (
                       <li key={idx} className="flex items-center gap-3 text-gray-500 font-bold text-sm">
-                        {!feature.reverse && <span className="w-1.5 h-1.5 rounded-full bg-[#FF5A3D]"></span>}
+                        {!feature.reverse && <span className="w-1.5 h-1.5 rounded-full bg-[#8DC63F]"></span>}
                         {detail}
-                        {feature.reverse && <span className="w-1.5 h-1.5 rounded-full bg-[#FF5A3D]"></span>}
+                        {feature.reverse && <span className="w-1.5 h-1.5 rounded-full bg-[#8DC63F]"></span>}
                       </li>
                     ))}
                   </ul>
