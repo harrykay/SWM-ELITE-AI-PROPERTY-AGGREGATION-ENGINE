@@ -37,6 +37,7 @@ import { ProjectsPage } from './components/ProjectsPage';
 import { PropertyFeed } from './components/PropertyFeed';
 import { LatestProjects } from './components/LatestProjects';
 import { DynamicPage } from './components/DynamicPage';
+import { InvestorDashboard } from './components/InvestorDashboard';
 import { Repeat, AlertTriangle, RefreshCw } from 'lucide-react';
 
 // --- Global Error Boundary ---
@@ -278,7 +279,7 @@ const INITIAL_PROJECTS: Project[] = [
 ];
 
 const App: React.FC = () => {
-  const [currentPage, setCurrentPage] = useState<'home' | 'properties' | 'projects' | 'services' | 'dashboard' | 'about' | 'contact' | 'login' | 'manage-content' | 'single-project' | 'single-property' | 'add-listing' | 'add-project' | 'dynamic' | 'land-processing' | 'design' | 'blog' | 'single-blog'>('home');
+  const [currentPage, setCurrentPage] = useState<'home' | 'properties' | 'projects' | 'investor-dashboard' | 'services' | 'dashboard' | 'about' | 'contact' | 'login' | 'manage-content' | 'single-project' | 'single-property' | 'add-listing' | 'add-project' | 'dynamic' | 'land-processing' | 'design' | 'blog' | 'single-blog'>('home');
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(null);
   const [selectedBlogSlug, setSelectedBlogSlug] = useState<string | null>(null);
@@ -445,7 +446,7 @@ const App: React.FC = () => {
         
         {!isDashboard && (
           <div className="fixed top-0 left-0 right-0 z-50">
-            <TopHeader onNavigate={handleNavigate} isAuthenticated={!!auth} user={auth?.user} onLogout={() => setAuth(null)} />
+            <TopHeader onNavigate={handleNavigate} isAuthenticated={!!auth} user={auth?.user} onLogout={() => setAuth(null)} isDarkMode={isDarkMode} />
             <Navbar 
               onNavigate={handleNavigate} 
               activePage={currentPage} 
@@ -484,6 +485,7 @@ const App: React.FC = () => {
           )}
           {currentPage === 'properties' && <PropertiesPage properties={properties} onPropertyClick={(id) => handleNavigate('single-property', { id })} currency={currency} />}
           {currentPage === 'projects' && <ProjectsPage projects={projects} onProjectClick={(id) => handleNavigate('single-project', { id })} />}
+          {currentPage === 'investor-dashboard' && <InvestorDashboard currency={currency} onNavigate={handleNavigate} />}
           {currentPage === 'blog' && <BlogPage blogs={blogs} onBlogClick={(slug) => handleNavigate('single-blog', { slug })} />}
           {currentPage === 'about' && (
             <AboutPage content={{
